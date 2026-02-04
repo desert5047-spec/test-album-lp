@@ -74,11 +74,6 @@ export function Features() {
                       }`}
                     />
                   </div>
-                  {feature.badge && (
-                    <Badge variant="secondary" className="text-xs">
-                      {feature.badge}
-                    </Badge>
-                  )}
                 </div>
                 <h3
                   className={`text-xl font-semibold ${
