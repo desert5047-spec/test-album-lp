@@ -31,7 +31,7 @@ export default function PrivacyPage() {
               テストアルバム（以下「本サービス」）は、ユーザーの個人情報を大切に扱います。
               このプライバシーポリシーでは、本サービスがどのような情報を取得し、どのように利用するかを説明します。
             </p>
-            <p className="text-sm text-gray-500">最終更新日：2024年1月</p>
+            <p className="text-sm text-gray-500">最終更新日：2026年2月</p>
           </div>
 
           <div className="space-y-6">
@@ -144,7 +144,7 @@ export default function PrivacyPage() {
                       （4）Cookieについて
                     </h4>
                     <p>
-                      Cookieは、ウェブサイトがユーザーのブラウザに保存する小さなデータファイルです。
+                    Cookieは、ウェブサイトやアプリにおいて、利用状況を把握するために端末に保存される小さなデータファイルです。
                       ブラウザの設定でCookieを無効にできますが、一部の機能が利用できなくなる場合があります。
                     </p>
                   </div>
@@ -158,7 +158,7 @@ export default function PrivacyPage() {
               </CardHeader>
               <CardContent className="space-y-4 text-gray-700 leading-relaxed">
                 <p>
-                  運営者は、以下の場合を除き、ユーザーの個人情報を第三者に提供しません：
+                  運営者は、以下の場合を除き、ユーザーの個人情報を第三者に提供しません。
                 </p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>ユーザーの同意がある場合</li>
@@ -170,7 +170,15 @@ export default function PrivacyPage() {
                     国の機関もしくは地方公共団体またはその委託を受けた者が法令の定める事務を遂行することに対して協力する必要がある場合
                   </li>
                 </ul>
-              </CardContent>
+                <p>
+                  なお、本サービスでは、サービスの提供および改善、広告配信等の目的のため、以下の第三者サービスを利用する場合があります。
+                  これらのサービスにおいては、各提供者のプライバシーポリシーに基づき、情報が管理されます。
+                </p>
+                <ul className="list-disc list-inside space-y-2 ml-4">
+                  <li>Google AdMob（広告配信）</li>
+                  <li>Google Analytics（利用状況の分析）</li>
+                </ul>
+               </CardContent>
             </Card>
 
             <Card>
@@ -179,10 +187,12 @@ export default function PrivacyPage() {
               </CardHeader>
               <CardContent className="space-y-4 text-gray-700 leading-relaxed">
                 <p>
-                  運営者は、ユーザーの個人情報を適切に管理し、不正アクセス、紛失、破壊、改ざん、漏洩などを防ぐため、合理的な安全対策を講じます。
+                  本サービスでは、取得したデータの保存および管理に、第三者のクラウドサービス（Supabase）を利用しています。
+                  これらのサービスは、適切なセキュリティ対策を講じた環境で運用されています。
                 </p>
-                <p className="text-sm text-gray-600 mt-4">
-                  ただし、インターネット上の通信において完全な安全性を保証することはできません。
+                <p>
+                  運営者は、ユーザーの個人情報について、不正アクセス、紛失、破壊、改ざん、漏洩などの防止に努め、合理的な安全対策を講じます。
+                  ただし、通信環境やシステム障害、誤操作等により、個人情報や登録データが消失または破損する可能性があり、その完全な安全性および保存・復元を保証するものではありません。
                 </p>
               </CardContent>
             </Card>
@@ -192,7 +202,7 @@ export default function PrivacyPage() {
                 <CardTitle>6. ユーザーの権利</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-gray-700 leading-relaxed">
-                <p>ユーザーは、以下の権利を有します：</p>
+                <p>ユーザーは、以下の権利を有します。</p>
                 <div className="space-y-3 ml-4">
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-2">
@@ -210,6 +220,15 @@ export default function PrivacyPage() {
                     <p>
                       ユーザーは、自己の個人情報について、開示、訂正、利用停止を請求することができます。
                       お問い合わせ窓口までご連絡ください。
+                    </p>
+                  </div>
+                  <Separator />
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      （3）アカウントの削除
+                    </h4>
+                    <p>
+                    ユーザーは、アカウントの削除を希望する場合、本サービス内のお問い合わせ機能よりご連絡ください。
                     </p>
                   </div>
                 </div>
@@ -257,6 +276,9 @@ export default function PrivacyPage() {
                 <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                   <p className="font-semibold text-gray-900">
                     お問い合わせ先
+                  </p>
+                  <p className="text-gray-700 mt-2">
+                    運営者：テストアルバム運営チーム
                   </p>
                   <p className="text-gray-700 mt-2">
                     メール：

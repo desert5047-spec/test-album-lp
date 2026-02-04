@@ -12,7 +12,6 @@ export function Header() {
 
   const navigation = [
     { name: "使い方", href: "#how-it-works" },
-    { name: "機能", href: "#features" },
     { name: "料金", href: "#pricing" },
     { name: "FAQ", href: "#faq" },
   ];

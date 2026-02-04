@@ -16,7 +16,7 @@ export function Pricing() {
         "写真でテスト保存",
         "教科・日付・点数の記録",
         "月ごとのふりかえり",
-        "タグ機能",
+        "広告あり",
       ],
       cta: "今日から始める",
       popular: false,
@@ -28,8 +28,6 @@ export function Pricing() {
       description: "より便利な機能を追加予定",
       features: [
         "無料プランの全機能",
-        "複数のお子さま対応",
-        "自動バックアップ",
         "広告なし",
       ],
       cta: "近日公開",

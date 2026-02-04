@@ -1,7 +1,7 @@
 import { Container } from "@/components/Container";
 import { SectionTitle } from "@/components/SectionTitle";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 export function Testimonials() {
   const testimonials = [
@@ -23,7 +23,7 @@ export function Testimonials() {
       name: "Cさん",
       role: "小学3年生のお母さん",
       content:
-        "グラフで推移が見えると、子どもも「前より良くなってる」と実感できるみたいです。プレッシャーにならない程度に、モチベーションになっているようです。",
+        "テストをファイル整理しなくて良く、家がスッキリしました。",
       initial: "C",
     },
   ];
@@ -33,7 +33,7 @@ export function Testimonials() {
       <Container>
         <SectionTitle
           title="ご利用の声"
-          subtitle="実際に使っている方の、リアルな感想です。"
+          subtitle="実証実験にて使って頂いた、感想です。"
         />
 
         <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
@@ -45,6 +45,25 @@ export function Testimonials() {
               <CardContent className="p-6 sm:p-8 space-y-4">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-12 w-12 bg-blue-100 text-blue-600">
+                    {testimonial.initial === "A" ? (
+                      <AvatarImage
+                        src="/testimonial-avatar-a.png"
+                        alt={testimonial.name}
+                        className="object-cover object-center"
+                      />
+                    ) : testimonial.initial === "B" ? (
+                      <AvatarImage
+                        src="/testimonial-avatar-b.png"
+                        alt={testimonial.name}
+                        className="object-cover object-top"
+                      />
+                    ) : testimonial.initial === "C" ? (
+                      <AvatarImage
+                        src="/testimonial-avatar-c.png"
+                        alt={testimonial.name}
+                        className="object-cover object-top"
+                      />
+                    ) : null}
                     <AvatarFallback className="text-lg font-semibold">
                       {testimonial.initial}
                     </AvatarFallback>

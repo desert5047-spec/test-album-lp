@@ -31,7 +31,7 @@ export default function TermsPage() {
               この利用規約（以下「本規約」）は、テストアルバム（以下「本サービス」）の利用条件を定めるものです。
               本サービスをご利用になる前に、必ずお読みください。
             </p>
-            <p className="text-sm text-gray-500">最終更新日：2024年1月</p>
+            <p className="text-sm text-gray-500">最終更新日：2026年2月</p>
           </div>
 
           <div className="space-y-6">
@@ -54,13 +54,15 @@ export default function TermsPage() {
                 <CardTitle>第2条（サービス内容）</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-gray-700 leading-relaxed">
-                <p>本サービスは、以下の機能を提供します：</p>
+                <p>本サービスは、以下の機能を提供します。</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>テストの写真を保存する機能</li>
                   <li>教科、日付、点数などの情報を記録する機能（任意）</li>
                   <li>月ごとの振り返りや推移を確認する機能</li>
                   <li>タグによる整理機能</li>
                 </ul>
+                <p>本サービスでは、広告が表示される場合があります。また、将来的に一部機能を有料で提供する場合があります。
+                </p>
                 <p className="text-sm text-gray-600 mt-4">
                   ※ サービス内容は予告なく変更される場合があります。
                 </p>
@@ -72,7 +74,7 @@ export default function TermsPage() {
                 <CardTitle>第3条（利用条件）</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-gray-700 leading-relaxed">
-                <p>ユーザーは、以下の条件を満たすものとします：</p>
+                <p>ユーザーは、以下の条件を満たすものとします。</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>本規約に同意すること</li>
                   <li>
@@ -82,6 +84,9 @@ export default function TermsPage() {
                     本サービスを個人的な用途に限り使用すること
                   </li>
                 </ul>
+                <p>ユーザーは、自己の責任においてアカウント情報を管理するものとし、第三者による不正利用について、運営者は責任を負いません。
+                </p>
+
               </CardContent>
             </Card>
 
@@ -90,7 +95,7 @@ export default function TermsPage() {
                 <CardTitle>第4条（禁止事項）</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-gray-700 leading-relaxed">
-                <p>ユーザーは、以下の行為を行ってはなりません：</p>
+                <p>ユーザーは、以下の行為を行ってはなりません。</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>法令または公序良俗に違反する行為</li>
                   <li>犯罪行為に関連する行為</li>
@@ -160,7 +165,7 @@ export default function TermsPage() {
                       4. 損害賠償の制限
                     </h4>
                     <p>
-                      本サービスの利用に起因してユーザーに生じた損害について、運営者は一切の責任を負いません。
+                    本サービスの利用に起因してユーザーに生じた損害について、運営者は、運営者の故意または重大な過失による場合を除き、責任を負わないものとします。
                     </p>
                   </div>
                 </div>

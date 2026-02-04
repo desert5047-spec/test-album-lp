@@ -1,6 +1,4 @@
 import { Container } from "@/components/Container";
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
 
 export function FinalCTA() {
   return (
@@ -25,25 +23,39 @@ export function FinalCTA() {
             </p>
           </div>
 
-          <Button
-            asChild
-            size="lg"
-            className="bg-blue-600 hover:bg-blue-700 text-lg px-10 py-7"
-          >
-            <a
-              href="https://example.com/app"
-              className="flex items-center gap-2"
-            >
-              今日から記録を始める
-              <ArrowRight className="h-5 w-5" />
-            </a>
-          </Button>
-
-          <p className="text-sm text-gray-600">
-            ※ 会員登録やアプリのダウンロードは不要です
-            <br />
-            ※ いつでも削除できます
-          </p>
+          <div className="flex flex-col items-center gap-2 pt-4">
+            <div className="flex items-center justify-center gap-4 flex-wrap">
+              <a
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-opacity hover:opacity-80 h-10 flex items-center"
+                aria-label="App Store でダウンロード"
+              >
+                <img
+                  src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/ja-jp?size=250x83&releaseDate=1276560000"
+                  alt="App Store でダウンロード"
+                  className="h-full w-auto"
+                />
+              </a>
+              <a
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-opacity hover:opacity-80 h-10 flex items-center"
+                aria-label="Google Play ストアでダウンロード"
+              >
+                <img
+                  src="https://play.google.com/intl/en_us/badges/static/images/badges/ja_badge_web_generic.png"
+                  alt="Google Play で手に入れよう"
+                  className="h-full w-auto"
+                />
+              </a>
+            </div>
+            <p className="text-xs sm:text-sm text-gray-500">
+              アプリは近日公開予定
+            </p>
+          </div>
         </div>
       </Container>
     </section>
