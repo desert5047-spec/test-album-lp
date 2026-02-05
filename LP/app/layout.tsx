@@ -103,8 +103,9 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    // Google Search Console用（必要に応じて追加）
-    // google: 'your-google-verification-code',
+    // Google Search Console用
+    // 変更理由: Google Search ConsoleのHTML確認タグを追加
+    google: 'hzCgkMqhiiv9Li4sS7iSz0vV_RAApUvn5xX-axY0aIA',
   },
   // 変更理由: faviconを設定するため、iconsメタデータを追加
   icons: {
