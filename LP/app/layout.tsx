@@ -58,7 +58,6 @@ export const metadata: Metadata = {
     title: 'テストアルバム - 子どものがんばりを、やさしく見守るアルバム',
     description: '子どものテストを写真で保存。教科・日付・点数は任意入力で、月ごとの振り返りで成長を実感。',
     // 変更理由: OGP画像をog.pngを優先し、存在しない場合はog-image.pngを使用
-    // TODO: public/og.pngが存在しない場合は作成してください
     images: [
       {
         url: `${siteUrl}/og.png`,
@@ -96,6 +95,11 @@ export const metadata: Metadata = {
   verification: {
     // Google Search Console用（必要に応じて追加）
     // google: 'your-google-verification-code',
+  },
+  // 変更理由: faviconを設定するため、iconsメタデータを追加
+  icons: {
+    icon: '/icon.png',
+    apple: '/icon.png',
   },
 };
 
