@@ -7,7 +7,7 @@ export function Footer() {
   const links = [
     { name: "利用規約", href: "/terms" },
     { name: "プライバシーポリシー", href: "/privacy" },
-    { name: "お問い合わせ", href: "mailto:support@example.com" },
+    { name: "お問い合わせ", href: "https://docs.google.com/forms/d/e/1FAIpQLSeNQjw8CRwEPbCD9JfvAY3dbWTdDNlyXBV8UOk4zdtGQLTOTg/viewform?usp=publish-editor" },
   ];
 
   return (
@@ -34,15 +34,33 @@ export function Footer() {
             </Link>
 
             <nav className="flex flex-wrap gap-6">
-              {links.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className="text-sm hover:text-white transition-colors"
-                >
-                  {link.name}
-                </Link>
-              ))}
+              {links.map((link) => {
+                const isExternal = link.href.startsWith('http');
+                
+                if (isExternal) {
+                  return (
+                    <a
+                      key={link.name}
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm hover:text-white transition-colors"
+                    >
+                      {link.name}
+                    </a>
+                  );
+                }
+                
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className="text-sm hover:text-white transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                );
+              })}
             </nav>
           </div>
 

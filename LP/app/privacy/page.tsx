@@ -281,12 +281,14 @@ export default function PrivacyPage() {
                     運営者：テストアルバム運営チーム
                   </p>
                   <p className="text-gray-700 mt-2">
-                    メール：
+                    お問い合わせフォーム：
                     <a
-                      href="mailto:support@example.com"
-                      className="text-blue-600 hover:underline"
+                      href="https://docs.google.com/forms/d/e/1FAIpQLSeNQjw8CRwEPbCD9JfvAY3dbWTdDNlyXBV8UOk4zdtGQLTOTg/viewform?usp=publish-editor"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline ml-1"
                     >
-                      support@example.com
+                      こちらからお問い合わせください
                     </a>
                   </p>
                   <p className="text-sm text-gray-500 mt-2">
