@@ -25,8 +25,18 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.test-album.jp';
 // Google Analytics ID（環境変数から取得）
 // 変更理由: Google Analytics導入のため、環境変数でGA IDを管理
 // 本番環境（NODE_ENV === "production"）でのみ有効
-const gaId = process.env.NEXT_PUBLIC_GA_ID;
+// セキュリティ: GA IDの形式を検証してXSSを防止
+const rawGaId = process.env.NEXT_PUBLIC_GA_ID;
 const isProduction = process.env.NODE_ENV === 'production';
+
+// GA IDの形式検証（G-で始まる英数字のみ許可）
+const isValidGaId = (id: string | undefined): id is string => {
+  if (!id) return false;
+  // GA4の測定IDは G- で始まり、英数字とハイフンのみ
+  return /^G-[A-Z0-9]+$/i.test(id);
+};
+
+const gaId = isValidGaId(rawGaId) ? rawGaId : undefined;
 
 export const metadata: Metadata = {
   // 変更理由: 独自ドメイン対応のため、metadataBaseを本番URLに設定
@@ -122,6 +132,7 @@ export default function RootLayout({
               strategy="afterInteractive"
             />
             {/* Google tag (gtag.js) - 初期化スクリプト */}
+            {/* セキュリティ: gaIdは検証済みのため、XSSリスクは低い */}
             <Script id="google-analytics" strategy="afterInteractive">
               {`
                 window.dataLayer = window.dataLayer || [];
