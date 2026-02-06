@@ -34,16 +34,19 @@ export default function AuthCallbackPage() {
     let source: 'token' | 'code' | 'none' = 'none'; // deepLink用のsource
     let supabaseType: string | null = null; // Supabaseのtype（recovery/signupなど）
     let deepLinkParams = new URLSearchParams();
+    let accessToken: string | null = null;
+    let refreshToken: string | null = null;
+    let code: string | null = null;
 
     // ハッシュパラメータを優先（Supabaseの標準的な形式）
     if (hashParams.has('access_token') || hashParams.has('type')) {
       type = 'hash';
       source = 'token';
       // ハッシュから必要なパラメータを取得
-      const accessToken = hashParams.get('access_token');
+      accessToken = hashParams.get('access_token');
       supabaseType = hashParams.get('type'); // Supabaseのtypeを取得
       const expiresIn = hashParams.get('expires_in');
-      const refreshToken = hashParams.get('refresh_token');
+      refreshToken = hashParams.get('refresh_token');
 
       // access_tokenとrefresh_tokenは必ず含める（存在する場合）
       if (accessToken) deepLinkParams.set('access_token', accessToken);
@@ -58,10 +61,10 @@ export default function AuthCallbackPage() {
     else if (queryParams.has('code') || queryParams.has('type')) {
       type = 'query';
       source = 'code';
-      const code = queryParams.get('code');
+      code = queryParams.get('code');
       supabaseType = queryParams.get('type'); // Supabaseのtypeを取得
-      const refreshToken = queryParams.get('refresh_token');
-      const accessToken = queryParams.get('access_token');
+      refreshToken = queryParams.get('refresh_token');
+      accessToken = queryParams.get('access_token');
 
       // codeまたはaccess_tokenを優先
       if (code) deepLinkParams.set('code', code);
@@ -75,7 +78,13 @@ export default function AuthCallbackPage() {
     }
 
     // deepLinkを生成
-    const deepLinkQuery = deepLinkParams.toString();
+    const deepLinkQuery = new URLSearchParams({
+      access_token: accessToken ? encodeURIComponent(accessToken) : '',
+      refresh_token: refreshToken ? encodeURIComponent(refreshToken) : '',
+      code: code ? encodeURIComponent(code) : '',
+      type: supabaseType ?? '',
+      source,
+    }).toString();
     const deepLink = deepLinkQuery
       ? `testalbum://auth-callback?${deepLinkQuery}`
       : 'testalbum://auth-callback';
