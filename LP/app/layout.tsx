@@ -134,12 +134,15 @@ export default function RootLayout({
             />
             {/* Google tag (gtag.js) - 初期化スクリプト */}
             {/* セキュリティ: gaIdは検証済みのため、XSSリスクは低い */}
-            <Script id="google-analytics" strategy="afterInteractive">
+            {/* 変更理由: page_pathを明示的に設定して、全ページでpage_viewが確実に計測されるようにする */}
+            <Script id="ga4-init" strategy="afterInteractive">
               {`
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
-                gtag('config', '${gaId}');
+                gtag('config', '${gaId}', {
+                  page_path: window.location.pathname,
+                });
               `}
             </Script>
           </>
