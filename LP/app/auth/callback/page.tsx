@@ -18,21 +18,22 @@ export default function AuthCallbackPage() {
     setMounted(true);
     
     // URLクエリのみ解析（PKCE専用）
-    const search = window.location.search.substring(1); // ?を除去
+    const search = window.location.search; // 先頭の?付き
     const href = window.location.href;
 
     // クエリパラメータを取得（?code=...&type=...）
     const queryParams = new URLSearchParams(search);
 
-    const code = queryParams.get('code');
-    const supabaseType = queryParams.get('type');
+    const code = queryParams.get('code') ?? '';
+    const rawType = queryParams.get('type');
+    const supabaseType = rawType && rawType.length > 0 ? rawType : 'recovery';
     const hasCode = Boolean(code);
 
     // deepLinkを生成（codeがある場合のみ）
     const deepLink = hasCode
       ? `testalbum://auth-callback?${new URLSearchParams({
-          code: code ?? '',
-          type: supabaseType ?? '',
+          code,
+          type: supabaseType, // 必ず入れる（デフォルト: recovery）
         }).toString()}`
       : null;
 
