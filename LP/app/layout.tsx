@@ -121,10 +121,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <body className={`${inter.variable} ${notoSansJP.variable} font-sans`}>
-        {children}
-        {/* 変更理由: Google Analytics 4導入のため、Google tag (gtag.js)を追加 */}
+      <head>
+        {/* 変更理由: Google Analytics 4導入のため、Google tag (gtag.js)を<head>に明示的に配置 */}
         {/* 本番環境かつGA IDが設定されている場合のみ読み込む */}
+        {/* シンプルな実装で確実に動作するようにgtag('config')のみに変更 */}
         {isProduction && gaId && (
           <>
             {/* Google tag (gtag.js) - スクリプトの読み込み */}
@@ -132,21 +132,21 @@ export default function RootLayout({
               src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
               strategy="afterInteractive"
             />
-            {/* Google tag (gtag.js) - 初期化スクリプト */}
+            {/* Google tag (gtag.js) - 初期化スクリプト（シンプル版） */}
             {/* セキュリティ: gaIdは検証済みのため、XSSリスクは低い */}
-            {/* 変更理由: page_pathを明示的に設定して、全ページでpage_viewが確実に計測されるようにする */}
             <Script id="ga4-init" strategy="afterInteractive">
               {`
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
-                gtag('config', '${gaId}', {
-                  page_path: window.location.pathname,
-                });
+                gtag('config', '${gaId}');
               `}
             </Script>
           </>
         )}
+      </head>
+      <body className={`${inter.variable} ${notoSansJP.variable} font-sans`}>
+        {children}
       </body>
     </html>
   );
