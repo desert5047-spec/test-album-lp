@@ -87,7 +87,7 @@ export default function AuthCallbackPage() {
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
               <p className="text-red-800 font-semibold">エラー</p>
               <p className="text-red-600 text-sm mt-1">
-                認証パラメータが見つかりませんでした。
+                このリンクは期限切れです。アプリから再度メール送信してください
               </p>
             </div>
           )}
@@ -129,18 +129,17 @@ export default function AuthCallbackPage() {
 
           {/* アプリを開くボタン */}
           <div className="space-y-4">
-            {params.deepLink ? (
-              <a
-                href={params.deepLink}
-                className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-md text-center transition-colors"
-              >
-                アプリを開く
-              </a>
-            ) : (
-              <div className="block w-full bg-gray-200 text-gray-500 font-semibold py-3 px-6 rounded-md text-center">
-                アプリを開く
-              </div>
-            )}
+            <a
+              href={params.deepLink ?? '#'}
+              aria-disabled={!params.deepLink}
+              className={`block w-full font-semibold py-3 px-6 rounded-md text-center transition-colors ${
+                params.deepLink
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'bg-gray-200 text-gray-500 pointer-events-none'
+              }`}
+            >
+              アプリを開く
+            </a>
             <p className="text-xs text-gray-500 text-center">
               ボタンをタップしてアプリを起動してください
             </p>
