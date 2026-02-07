@@ -16,75 +16,93 @@ interface CallbackParams {
 export default function AuthCallbackPage() {
   const [params, setParams] = useState<CallbackParams | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    
-    // URLクエリとハッシュを解析
-    const search = window.location.search; // 先頭の?付き
-    const hash = window.location.hash; // 先頭の#付き
-    const href = window.location.href;
 
-    // クエリパラメータを取得（?code=...&type=...）
-    const queryParams = new URLSearchParams(search);
-    // ハッシュパラメータを取得（#access_token=...&type=...）
-    const hashParams = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash);
+    const parseAndSet = () => {
+      // URLクエリとハッシュを解析
+      const search = window.location.search; // 先頭の?付き
+      const hash = window.location.hash; // 先頭の#付き
+      const href = window.location.href;
 
-    const queryAccessToken = queryParams.get('access_token') ?? '';
-    const queryRefreshToken = queryParams.get('refresh_token') ?? '';
-    const queryType = queryParams.get('type');
-    const hashAccessToken = hashParams.get('access_token') ?? '';
-    const hashRefreshToken = hashParams.get('refresh_token') ?? '';
-    const hashType = hashParams.get('type');
+      // クエリパラメータを取得（?code=...&type=...）
+      const queryParams = new URLSearchParams(search);
+      // ハッシュパラメータを取得（#access_token=...&type=...）
+      const hashParams = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash);
 
-    let mode: 'query' | 'token' | 'none' = 'none';
-    let deepLink: string | null = null;
-    let supabaseType = 'recovery';
-    let accessLen = 0;
-    let refreshLen = 0;
+      const queryAccessToken = queryParams.get('access_token') ?? '';
+      const queryRefreshToken = queryParams.get('refresh_token') ?? '';
+      const queryType = queryParams.get('type');
+      const hashAccessToken = hashParams.get('access_token') ?? '';
+      const hashRefreshToken = hashParams.get('refresh_token') ?? '';
+      const hashType = hashParams.get('type');
 
-    // query優先。なければhash(access_token)を確認。
-    if (queryAccessToken || queryRefreshToken || queryType) {
-      mode = 'query';
-      supabaseType = queryType && queryType.length > 0 ? queryType : 'recovery';
-      accessLen = queryAccessToken.length;
-      refreshLen = queryRefreshToken.length;
-      const dl = new URLSearchParams();
-      dl.set('access_token', queryAccessToken);
-      dl.set('refresh_token', queryRefreshToken);
-      dl.set('type', supabaseType);
-      deepLink = `testalbum://auth-callback?${dl.toString()}`;
-    } else if (hashAccessToken) {
-      mode = 'token';
-      supabaseType = hashType && hashType.length > 0 ? hashType : 'recovery';
-      accessLen = hashAccessToken.length;
-      refreshLen = hashRefreshToken.length;
-      const dl = new URLSearchParams();
-      dl.set('access_token', hashAccessToken);
-      dl.set('refresh_token', hashRefreshToken);
-      dl.set('type', supabaseType);
-      deepLink = `testalbum://auth-callback?${dl.toString()}`;
-    }
+      let mode: 'query' | 'token' | 'none' = 'none';
+      let deepLink: string | null = null;
+      let supabaseType = 'recovery';
+      let accessLen = 0;
+      let refreshLen = 0;
 
-    setParams({
-      href,
-      search,
-      hash,
-      mode,
-      accessLen,
-      refreshLen,
-      supabaseType,
-      deepLink,
-    });
+      // query優先。なければhash(access_token)を確認。
+      if (queryAccessToken || queryRefreshToken || queryType) {
+        mode = 'query';
+        supabaseType = queryType && queryType.length > 0 ? queryType : 'recovery';
+        accessLen = queryAccessToken.length;
+        refreshLen = queryRefreshToken.length;
+        const dl = new URLSearchParams();
+        dl.set('access_token', queryAccessToken);
+        dl.set('refresh_token', queryRefreshToken);
+        dl.set('type', supabaseType);
+        deepLink = `testalbum://auth-callback?${dl.toString()}`;
+      } else if (hashAccessToken || hashRefreshToken || hashType) {
+        // hash側はaccess_tokenが空でもtype/refresh_tokenがあればtokenモード
+        mode = 'token';
+        supabaseType = hashType && hashType.length > 0 ? hashType : 'recovery';
+        accessLen = hashAccessToken.length;
+        refreshLen = hashRefreshToken.length;
+        const dl = new URLSearchParams();
+        dl.set('access_token', hashAccessToken);
+        dl.set('refresh_token', hashRefreshToken);
+        dl.set('type', supabaseType);
+        deepLink = `testalbum://auth-callback?${dl.toString()}`;
+      }
 
-    // 500ms後に自動でdeepLinkに遷移
-    if (deepLink) {
-      const targetDeepLink = deepLink;
-      const timer = setTimeout(() => {
-        window.location.href = targetDeepLink;
-      }, 500);
+      setParams({
+        href,
+        search,
+        hash,
+        mode,
+        accessLen,
+        refreshLen,
+        supabaseType,
+        deepLink,
+      });
 
-      return () => clearTimeout(timer);
+      return { mode, accessLen, refreshLen };
+    };
+
+    const initial = parseAndSet();
+
+    // 初回解析後、mode=none or accessLen=0の場合は再解析
+    if (initial.mode === 'none' || initial.accessLen === 0) {
+      setIsRetrying(true);
+      let attempts = 0;
+      const interval = setInterval(() => {
+        attempts += 1;
+        const result = parseAndSet();
+
+        if (
+          (result.mode !== 'none' && result.accessLen > 0) ||
+          attempts >= 10
+        ) {
+          clearInterval(interval);
+          setIsRetrying(false);
+        }
+      }, 200);
+
+      return () => clearInterval(interval);
     }
   }, []);
 
@@ -105,7 +123,7 @@ export default function AuthCallbackPage() {
     );
   }
 
-  const hasError = params.mode === 'none';
+  const hasError = params.mode === 'none' && !isRetrying;
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
