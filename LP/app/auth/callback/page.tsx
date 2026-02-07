@@ -6,8 +6,7 @@ interface CallbackParams {
   href: string;
   search: string;
   hash: string;
-  mode: 'code' | 'token' | 'none';
-  codeLen: number;
+  mode: 'query' | 'token' | 'none';
   accessLen: number;
   refreshLen: number;
   supabaseType: string; // Supabaseのtype（recovery/signupなど）
@@ -31,26 +30,28 @@ export default function AuthCallbackPage() {
     // ハッシュパラメータを取得（#access_token=...&type=...）
     const hashParams = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash);
 
-    const queryCode = queryParams.get('code') ?? '';
+    const queryAccessToken = queryParams.get('access_token') ?? '';
+    const queryRefreshToken = queryParams.get('refresh_token') ?? '';
     const queryType = queryParams.get('type');
     const hashAccessToken = hashParams.get('access_token') ?? '';
     const hashRefreshToken = hashParams.get('refresh_token') ?? '';
     const hashType = hashParams.get('type');
 
-    let mode: 'code' | 'token' | 'none' = 'none';
+    let mode: 'query' | 'token' | 'none' = 'none';
     let deepLink: string | null = null;
     let supabaseType = 'recovery';
-    let codeLen = 0;
     let accessLen = 0;
     let refreshLen = 0;
 
-    // code優先。なければhash(access_token)を確認。
-    if (queryCode) {
-      mode = 'code';
+    // query優先。なければhash(access_token)を確認。
+    if (queryAccessToken || queryRefreshToken || queryType) {
+      mode = 'query';
       supabaseType = queryType && queryType.length > 0 ? queryType : 'recovery';
-      codeLen = queryCode.length;
+      accessLen = queryAccessToken.length;
+      refreshLen = queryRefreshToken.length;
       const dl = new URLSearchParams();
-      dl.set('code', queryCode);
+      dl.set('access_token', queryAccessToken);
+      dl.set('refresh_token', queryRefreshToken);
       dl.set('type', supabaseType);
       deepLink = `testalbum://auth-callback?${dl.toString()}`;
     } else if (hashAccessToken) {
@@ -70,7 +71,6 @@ export default function AuthCallbackPage() {
       search,
       hash,
       mode,
-      codeLen,
       accessLen,
       refreshLen,
       supabaseType,
@@ -149,10 +149,6 @@ export default function AuthCallbackPage() {
                 <div>
                   <span className="text-gray-600">mode:</span>
                   <div className="text-gray-900 mt-1">{params.mode}</div>
-                </div>
-                <div>
-                  <span className="text-gray-600">codeLen:</span>
-                  <div className="text-gray-900 mt-1">{params.codeLen}</div>
                 </div>
                 <div>
                   <span className="text-gray-600">accessLen:</span>
