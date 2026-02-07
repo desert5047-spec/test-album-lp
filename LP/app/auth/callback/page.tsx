@@ -62,7 +62,7 @@ export default function AuthCallbackPage() {
       if (debugValue) {
         dl.set('debug', debugValue);
       }
-        deepLink = `testalbum://auth-callback?${dl.toString()}`;
+        deepLink = `testalbum:///auth-callback?${dl.toString()}`;
       } else if (hashAccessToken || hashRefreshToken || hashType) {
         // hash側はaccess_tokenが空でもtype/refresh_tokenがあればtokenモード
         mode = 'token';
@@ -76,7 +76,7 @@ export default function AuthCallbackPage() {
       if (debugValue) {
         dl.set('debug', debugValue);
       }
-        deepLink = `testalbum://auth-callback?${dl.toString()}`;
+        deepLink = `testalbum:///auth-callback?${dl.toString()}`;
       }
 
     setParams({
