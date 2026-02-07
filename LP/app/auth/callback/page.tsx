@@ -5,8 +5,12 @@ import { useEffect, useState } from 'react';
 interface CallbackParams {
   href: string;
   search: string;
-  hasCode: boolean;
-  supabaseType: string | null; // Supabaseのtype（recovery/signupなど）
+  hash: string;
+  mode: 'code' | 'token' | 'none';
+  codeLen: number;
+  accessLen: number;
+  refreshLen: number;
+  supabaseType: string; // Supabaseのtype（recovery/signupなど）
   deepLink: string | null;
 }
 
@@ -17,30 +21,58 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     setMounted(true);
     
-    // URLクエリのみ解析（PKCE専用）
+    // URLクエリとハッシュを解析
     const search = window.location.search; // 先頭の?付き
+    const hash = window.location.hash; // 先頭の#付き
     const href = window.location.href;
 
     // クエリパラメータを取得（?code=...&type=...）
     const queryParams = new URLSearchParams(search);
+    // ハッシュパラメータを取得（#access_token=...&type=...）
+    const hashParams = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash);
 
-    const code = queryParams.get('code') ?? '';
-    const rawType = queryParams.get('type');
-    const supabaseType = rawType && rawType.length > 0 ? rawType : 'recovery';
-    const hasCode = Boolean(code);
+    const queryCode = queryParams.get('code') ?? '';
+    const queryType = queryParams.get('type');
+    const hashAccessToken = hashParams.get('access_token') ?? '';
+    const hashRefreshToken = hashParams.get('refresh_token') ?? '';
+    const hashType = hashParams.get('type');
 
-    // deepLinkを生成（codeがある場合のみ）
-    const deepLink = hasCode
-      ? `testalbum://auth-callback?${new URLSearchParams({
-          code,
-          type: supabaseType, // 必ず入れる（デフォルト: recovery）
-        }).toString()}`
-      : null;
+    let mode: 'code' | 'token' | 'none' = 'none';
+    let deepLink: string | null = null;
+    let supabaseType = 'recovery';
+    let codeLen = 0;
+    let accessLen = 0;
+    let refreshLen = 0;
+
+    // code優先。なければhash(access_token)を確認。
+    if (queryCode) {
+      mode = 'code';
+      supabaseType = queryType && queryType.length > 0 ? queryType : 'recovery';
+      codeLen = queryCode.length;
+      const dl = new URLSearchParams();
+      dl.set('code', queryCode);
+      dl.set('type', supabaseType);
+      deepLink = `testalbum://auth-callback?${dl.toString()}`;
+    } else if (hashAccessToken) {
+      mode = 'token';
+      supabaseType = hashType && hashType.length > 0 ? hashType : 'recovery';
+      accessLen = hashAccessToken.length;
+      refreshLen = hashRefreshToken.length;
+      const dl = new URLSearchParams();
+      dl.set('access_token', hashAccessToken);
+      dl.set('refresh_token', hashRefreshToken);
+      dl.set('type', supabaseType);
+      deepLink = `testalbum://auth-callback?${dl.toString()}`;
+    }
 
     setParams({
       href,
       search,
-      hasCode,
+      hash,
+      mode,
+      codeLen,
+      accessLen,
+      refreshLen,
       supabaseType,
       deepLink,
     });
@@ -72,7 +104,7 @@ export default function AuthCallbackPage() {
     );
   }
 
-  const hasError = !params.hasCode;
+  const hasError = params.mode === 'none';
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -108,14 +140,30 @@ export default function AuthCallbackPage() {
                   </div>
                 </div>
                 <div>
-                  <span className="text-gray-600">code有無:</span>
+                  <span className="text-gray-600">hash:</span>
                   <div className="text-gray-900 mt-1">
-                    {params.hasCode ? 'あり' : 'なし'}
+                    {params.hash || '(なし)'}
                   </div>
                 </div>
                 <div>
+                  <span className="text-gray-600">mode:</span>
+                  <div className="text-gray-900 mt-1">{params.mode}</div>
+                </div>
+                <div>
+                  <span className="text-gray-600">codeLen:</span>
+                  <div className="text-gray-900 mt-1">{params.codeLen}</div>
+                </div>
+                <div>
+                  <span className="text-gray-600">accessLen:</span>
+                  <div className="text-gray-900 mt-1">{params.accessLen}</div>
+                </div>
+                <div>
+                  <span className="text-gray-600">refreshLen:</span>
+                  <div className="text-gray-900 mt-1">{params.refreshLen}</div>
+                </div>
+                <div>
                   <span className="text-gray-600">type:</span>
-                  <div className="text-gray-900 mt-1">{params.supabaseType || '(なし)'}</div>
+                  <div className="text-gray-900 mt-1">{params.supabaseType}</div>
                 </div>
                 <div>
                   <span className="text-gray-600">deepLink:</span>
