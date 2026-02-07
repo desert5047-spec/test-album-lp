@@ -79,8 +79,9 @@ export default function AuthCallbackPage() {
 
     // 500ms後に自動でdeepLinkに遷移
     if (deepLink) {
+      const targetDeepLink = deepLink;
       const timer = setTimeout(() => {
-        window.location.href = deepLink;
+        window.location.href = targetDeepLink;
       }, 500);
 
       return () => clearTimeout(timer);
