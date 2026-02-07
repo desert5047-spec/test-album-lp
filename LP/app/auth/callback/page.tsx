@@ -11,6 +11,7 @@ interface CallbackParams {
   refreshLen: number;
   supabaseType: string; // Supabaseのtype（recovery/signupなど）
   deepLink: string | null;
+  debugValue: string;
 }
 
 export default function AuthCallbackPage() {
@@ -35,9 +36,12 @@ export default function AuthCallbackPage() {
       const queryAccessToken = queryParams.get('access_token') ?? '';
       const queryRefreshToken = queryParams.get('refresh_token') ?? '';
       const queryType = queryParams.get('type');
+      const queryDebug = queryParams.get('debug');
       const hashAccessToken = hashParams.get('access_token') ?? '';
       const hashRefreshToken = hashParams.get('refresh_token') ?? '';
       const hashType = hashParams.get('type');
+      const hashDebug = hashParams.get('debug');
+      const debugValue = queryDebug || hashDebug || '';
 
       let mode: 'query' | 'token' | 'none' = 'none';
       let deepLink: string | null = null;
@@ -55,6 +59,9 @@ export default function AuthCallbackPage() {
         dl.set('access_token', queryAccessToken);
         dl.set('refresh_token', queryRefreshToken);
         dl.set('type', supabaseType);
+      if (debugValue) {
+        dl.set('debug', debugValue);
+      }
         deepLink = `testalbum://auth-callback?${dl.toString()}`;
       } else if (hashAccessToken || hashRefreshToken || hashType) {
         // hash側はaccess_tokenが空でもtype/refresh_tokenがあればtokenモード
@@ -66,10 +73,13 @@ export default function AuthCallbackPage() {
         dl.set('access_token', hashAccessToken);
         dl.set('refresh_token', hashRefreshToken);
         dl.set('type', supabaseType);
+      if (debugValue) {
+        dl.set('debug', debugValue);
+      }
         deepLink = `testalbum://auth-callback?${dl.toString()}`;
       }
 
-      setParams({
+    setParams({
         href,
         search,
         hash,
@@ -78,6 +88,7 @@ export default function AuthCallbackPage() {
         refreshLen,
         supabaseType,
         deepLink,
+      debugValue,
       });
 
       return { mode, accessLen, refreshLen };
@@ -179,6 +190,12 @@ export default function AuthCallbackPage() {
                 <div>
                   <span className="text-gray-600">type:</span>
                   <div className="text-gray-900 mt-1">{params.supabaseType}</div>
+                </div>
+                <div>
+                  <span className="text-gray-600">debug:</span>
+                  <div className="text-gray-900 mt-1">
+                    {params.debugValue || '(なし)'}
+                  </div>
                 </div>
                 <div>
                   <span className="text-gray-600">deepLink:</span>
