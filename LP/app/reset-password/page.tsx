@@ -28,7 +28,9 @@ export default function ResetPasswordPage() {
     setSubmitting(true);
     const supabase = createSupabaseClient();
     if (!supabase) {
-      setError("設定エラーが発生しました。");
+      const configError = new Error("Supabaseの設定が未設定です。");
+      console.error("[RESET_PASSWORD]", configError);
+      setError(`送信に失敗しました: ${configError.message}`);
       setSubmitting(false);
       return;
     }
