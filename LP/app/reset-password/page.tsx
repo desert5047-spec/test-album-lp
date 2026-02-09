@@ -45,7 +45,7 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    setMessage("送信しました。迷惑メールも確認");
+    setMessage("再設定リンクを送信しました。迷惑メールもご確認ください。");
   };
 
   return (
