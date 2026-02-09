@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { createSupabaseClient } from "@/lib/supabaseClient";
 
 const contactUrl =
   "https://docs.google.com/forms/d/e/1FAIpQLSeNQjw8CRwEPbCD9JfvAY3dbWTdDNlyXBV8UOk4zdtGQLTOTg/viewform?usp=publish-editor";
@@ -22,6 +22,12 @@ export default function ResetPasswordPage() {
 
     if (!email.trim()) {
       setError("メールアドレスを入力してください。");
+      return;
+    }
+
+    const supabase = createSupabaseClient();
+    if (!supabase) {
+      setError("設定エラーが発生しました。時間をおいて再度お試しください。");
       return;
     }
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabaseClient";
+import { createSupabaseClient } from "@/lib/supabaseClient";
 
 export default function UpdatePasswordPage() {
   const [password, setPassword] = useState("");
@@ -23,6 +23,12 @@ export default function UpdatePasswordPage() {
 
     if (password !== confirmPassword) {
       setError("パスワードが一致しません。");
+      return;
+    }
+
+    const supabase = createSupabaseClient();
+    if (!supabase) {
+      setError("設定エラーが発生しました。時間をおいて再度お試しください。");
       return;
     }
 
