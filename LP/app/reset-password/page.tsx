@@ -14,11 +14,13 @@ export default function ResetPasswordPage() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [debugInfo, setDebugInfo] = useState<string[]>([]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError("");
     setMessage("");
+    setDebugInfo([]);
 
     if (!email.trim()) {
       setError("メールアドレスを入力してください。");
@@ -26,6 +28,47 @@ export default function ResetPasswordPage() {
     }
 
     setSubmitting(true);
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+    const urlPrefix = supabaseUrl.slice(0, 30);
+    const keyPrefix = supabaseAnonKey.slice(0, 10);
+
+    console.error("[RESET_PASSWORD][DEBUG]", {
+      urlPrefix,
+      keyPrefix,
+    });
+    setDebugInfo([
+      `DEBUG url=${urlPrefix || "(空)"}${supabaseUrl.length > 30 ? "..." : ""}`,
+      `DEBUG key=${keyPrefix || "(空)"}${supabaseAnonKey.length > 10 ? "..." : ""}`,
+    ]);
+
+    if (!supabaseUrl || !supabaseUrl.startsWith("https://")) {
+      setError(`送信に失敗しました: 無効なSUPABASE_URLです。`);
+      setSubmitting(false);
+      return;
+    }
+
+    try {
+      const healthRes = await fetch(`${supabaseUrl}/auth/v1/health`, {
+        method: "GET",
+      });
+
+      if (!healthRes.ok) {
+        setDebugInfo((prev) => [...prev, `health: failed (${healthRes.status})`]);
+        setError("Supabaseに到達できません");
+        setSubmitting(false);
+        return;
+      }
+
+      setDebugInfo((prev) => [...prev, "health: ok"]);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Unknown error";
+      setDebugInfo((prev) => [...prev, "health: failed"]);
+      setError(`Supabaseに到達できません: ${message}`);
+      setSubmitting(false);
+      return;
+    }
+
     const supabase = createSupabaseClient();
     if (!supabase) {
       const configError = new Error("Supabaseの設定が未設定です。");
@@ -35,15 +78,23 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-      email.trim(),
-      { redirectTo }
-    );
-    setSubmitting(false);
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+        email.trim(),
+        { redirectTo }
+      );
+      setSubmitting(false);
 
-    if (resetError) {
-      console.error("[RESET_PASSWORD]", resetError);
-      setError(`送信に失敗しました: ${resetError.message}`);
+      if (resetError) {
+        console.error("[RESET_PASSWORD]", resetError);
+        setError(`送信に失敗しました: ${resetError.message}`);
+        return;
+      }
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Unknown error";
+      console.error("[RESET_PASSWORD]", e);
+      setError(`送信に失敗しました: ${message}`);
+      setSubmitting(false);
       return;
     }
 
@@ -85,6 +136,13 @@ export default function ResetPasswordPage() {
         {error && (
           <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">
             {error}
+          </div>
+        )}
+        {debugInfo.length > 0 && (
+          <div className="rounded-md bg-gray-50 p-3 text-xs text-gray-700 space-y-1">
+            {debugInfo.map((line, index) => (
+              <div key={index}>{line}</div>
+            ))}
           </div>
         )}
 
