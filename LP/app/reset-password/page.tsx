@@ -25,13 +25,14 @@ export default function ResetPasswordPage() {
       return;
     }
 
+    setSubmitting(true);
     const supabase = createSupabaseClient();
     if (!supabase) {
-      setError("設定エラーが発生しました。時間をおいて再度お試しください。");
+      setError("設定エラーが発生しました。");
+      setSubmitting(false);
       return;
     }
 
-    setSubmitting(true);
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
       email.trim(),
       { redirectTo }
@@ -39,13 +40,12 @@ export default function ResetPasswordPage() {
     setSubmitting(false);
 
     if (resetError) {
-      setError("送信に失敗しました。時間をおいて再度お試しください。");
+      console.error("[RESET_PASSWORD]", resetError);
+      setError(`送信に失敗しました: ${resetError.message}`);
       return;
     }
 
-    setMessage(
-      "送信しました。迷惑メールフォルダもご確認ください。"
-    );
+    setMessage("送信しました。迷惑メールも確認");
   };
 
   return (

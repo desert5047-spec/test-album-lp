@@ -26,20 +26,22 @@ export default function UpdatePasswordPage() {
       return;
     }
 
+    setSubmitting(true);
     const supabase = createSupabaseClient();
     if (!supabase) {
-      setError("設定エラーが発生しました。時間をおいて再度お試しください。");
+      setError("設定エラーが発生しました。");
+      setSubmitting(false);
       return;
     }
 
-    setSubmitting(true);
     const { error: updateError } = await supabase.auth.updateUser({
       password,
     });
     setSubmitting(false);
 
     if (updateError) {
-      setError("更新に失敗しました。時間をおいて再度お試しください。");
+      console.error("[UPDATE_PASSWORD]", updateError);
+      setError(`更新に失敗しました: ${updateError.message}`);
       return;
     }
 
