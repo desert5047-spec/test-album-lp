@@ -51,6 +51,9 @@ export default function ResetPasswordPage() {
     try {
       const healthRes = await fetch(`${supabaseUrl}/auth/v1/health`, {
         method: "GET",
+        headers: {
+          apikey: supabaseAnonKey,
+        },
       });
 
       if (!healthRes.ok) {
