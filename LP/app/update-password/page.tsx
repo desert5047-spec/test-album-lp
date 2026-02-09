@@ -1,16 +1,12 @@
 'use client';
 
-import Link from "next/link";
 import { useState } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 
-const contactUrl =
-  "https://docs.google.com/forms/d/e/1FAIpQLSeNQjw8CRwEPbCD9JfvAY3dbWTdDNlyXBV8UOk4zdtGQLTOTg/viewform?usp=publish-editor";
-
-const redirectTo = "https://www.test-album.jp/update-password";
-
-export default function ResetPasswordPage() {
-  const [email, setEmail] = useState("");
+export default function UpdatePasswordPage() {
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -20,26 +16,30 @@ export default function ResetPasswordPage() {
     setError("");
     setMessage("");
 
-    if (!email.trim()) {
-      setError("メールアドレスを入力してください。");
+    if (!password || !confirmPassword) {
+      setError("パスワードを入力してください。");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("パスワードが一致しません。");
       return;
     }
 
     setSubmitting(true);
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-      email.trim(),
-      { redirectTo }
-    );
+    const { error: updateError } = await supabase.auth.updateUser({
+      password,
+    });
     setSubmitting(false);
 
-    if (resetError) {
-      setError("送信に失敗しました。時間をおいて再度お試しください。");
+    if (updateError) {
+      setError("更新に失敗しました。時間をおいて再度お試しください。");
       return;
     }
 
-    setMessage(
-      "送信しました。迷惑メールフォルダもご確認ください。"
-    );
+    setMessage("更新完了。アプリに戻ってログインしてください。");
+    setPassword("");
+    setConfirmPassword("");
   };
 
   return (
@@ -49,14 +49,26 @@ export default function ResetPasswordPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <label className="block text-sm font-medium text-gray-700">
-            メールアドレス
+            新しいパスワード
             <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
               className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:outline-none"
-              placeholder="example@email.com"
-              autoComplete="email"
+              placeholder="新しいパスワード"
+              autoComplete="new-password"
+            />
+          </label>
+
+          <label className="block text-sm font-medium text-gray-700">
+            新しいパスワード（確認）
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:outline-none"
+              placeholder="もう一度入力"
+              autoComplete="new-password"
             />
           </label>
 
@@ -65,7 +77,7 @@ export default function ResetPasswordPage() {
             disabled={submitting}
             className="w-full rounded-md bg-blue-600 py-2.5 text-white font-semibold hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            再設定リンクを送る
+            更新
           </button>
         </form>
 
@@ -79,25 +91,6 @@ export default function ResetPasswordPage() {
             {error}
           </div>
         )}
-
-        <div className="space-y-3 text-sm text-gray-700 leading-relaxed">
-          <p>
-            メールが届かない場合は、迷惑メールフォルダをご確認のうえ、
-            少し時間を置いてから再度お試しください。
-          </p>
-          <p className="text-gray-600">
-            それでも解決しない場合は、
-            <a
-              href={contactUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline ml-1"
-            >
-              お問い合わせ
-            </a>
-            ください。
-          </p>
-        </div>
 
         <div className="pt-2">
           <Link href="/" className="text-sm text-blue-600 hover:underline">
