@@ -11,13 +11,21 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [alreadyRegistered, setAlreadyRegistered] = useState(false);
+  const [agreed, setAgreed] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
+    setAlreadyRegistered(false);
 
     if (!email.trim() || !password) {
       setError('メールアドレスとパスワードを入力してください。');
+      return;
+    }
+
+    if (!agreed) {
+      setError('利用規約とプライバシーポリシーへの同意が必要です');
       return;
     }
 
@@ -28,7 +36,7 @@ export default function SignupPage() {
     }
 
     setSubmitting(true);
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email: email.trim(),
       password,
       options: {
@@ -36,6 +44,17 @@ export default function SignupPage() {
       },
     });
     setSubmitting(false);
+
+    const isIdentityMissing =
+      !signUpError && Array.isArray(data?.user?.identities) && data.user.identities.length === 0;
+
+    if (isIdentityMissing) {
+      setError(
+        'このメールアドレスは既に登録されています。アプリに戻ってログインしてください。'
+      );
+      setAlreadyRegistered(true);
+      return;
+    }
 
     if (signUpError) {
       const message = signUpError.message?.toLowerCase() ?? '';
@@ -47,8 +66,9 @@ export default function SignupPage() {
 
       if (isAlreadyRegistered) {
         setError(
-          'このメールアドレスは既に登録されています。ログインしてください。'
+          'このメールアドレスは既に登録されています。アプリに戻ってログインしてください。'
         );
+        setAlreadyRegistered(true);
       } else {
         setError(signUpError.message);
       }
@@ -90,7 +110,7 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || !agreed}
             className="w-full rounded-md bg-blue-600 py-2.5 text-white font-semibold hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             登録する
@@ -101,19 +121,52 @@ export default function SignupPage() {
           )}
         </form>
 
+        <label className="flex items-start gap-2 text-sm text-gray-700">
+          <input
+            type="checkbox"
+            checked={agreed}
+            onChange={(event) => setAgreed(event.target.checked)}
+            className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+          <span>
+            <a
+              href="/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+            >
+              プライバシーポリシー
+            </a>
+            と
+            <a
+              href="/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline ml-1"
+            >
+              利用規約
+            </a>
+            に同意します
+          </span>
+        </label>
+
         <div className="pt-2 space-y-2">
-          <p className="text-sm text-gray-700">
-            アプリに戻ってログインしてください。
-          </p>
-          <a
-            href="testalbum://login"
-            className="inline-block text-sm text-blue-600 hover:underline"
-          >
-            アプリを開く
-          </a>
-          <p className="text-xs text-gray-500">
-            ボタンで開けない場合は、アプリを手動で起動してください。
-          </p>
+          {alreadyRegistered && (
+            <>
+              <p className="text-sm text-gray-700">
+                アプリに戻ってログインしてください。
+              </p>
+              <a
+                href="testalbum://login"
+                className="inline-block text-sm text-blue-600 hover:underline"
+              >
+                アプリを開く
+              </a>
+              <p className="text-xs text-gray-500">
+                ボタンで開けない場合は、アプリを手動で起動してください。
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>
