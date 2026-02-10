@@ -28,13 +28,13 @@ export default function SignupPage() {
     }
 
     setSubmitting(true);
-    const { error: signUpError } = await supabase.auth.signUp(
-      email.trim(),
+    const { error: signUpError } = await supabase.auth.signUp({
+      email: email.trim(),
       password,
-      {
+      options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
-      }
-    );
+      },
+    });
     setSubmitting(false);
 
     if (signUpError) {
