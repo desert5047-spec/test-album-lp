@@ -28,17 +28,30 @@ export default function SignupPage() {
     }
 
     setSubmitting(true);
-    const { error: signUpError } = await supabase.auth.signUp({
-      email: email.trim(),
+    const { error: signUpError } = await supabase.auth.signUp(
+      email.trim(),
       password,
-      options: {
+      {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+      }
+    );
     setSubmitting(false);
 
     if (signUpError) {
-      setError(`送信に失敗しました: ${signUpError.message}`);
+      const message = signUpError.message?.toLowerCase() ?? '';
+      const isAlreadyRegistered =
+        message.includes('already') ||
+        message.includes('registered') ||
+        signUpError.status === 400 ||
+        signUpError.status === 422;
+
+      if (isAlreadyRegistered) {
+        setError(
+          'このメールアドレスは既に登録されています。ログインしてください。'
+        );
+      } else {
+        setError(signUpError.message);
+      }
       return;
     }
 
@@ -82,17 +95,15 @@ export default function SignupPage() {
           >
             登録する
           </button>
+
+          {error && (
+            <p className="text-sm text-red-600">{error}</p>
+          )}
         </form>
 
-        {error && (
-          <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
         <div className="pt-2">
-          <Link href="/" className="text-sm text-blue-600 hover:underline">
-            トップへ戻る
+          <Link href="/login" className="text-sm text-blue-600 hover:underline">
+            ログインへ
           </Link>
         </div>
       </div>
