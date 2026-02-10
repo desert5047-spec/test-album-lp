@@ -45,8 +45,9 @@ export default function SignupPage() {
     });
     setSubmitting(false);
 
+    const identities = data?.user?.identities;
     const isIdentityMissing =
-      !signUpError && Array.isArray(data?.user?.identities) && data.user.identities.length === 0;
+      !signUpError && Array.isArray(identities) && identities.length === 0;
 
     if (isIdentityMissing) {
       setError(
