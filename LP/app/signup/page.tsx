@@ -101,10 +101,19 @@ export default function SignupPage() {
           )}
         </form>
 
-        <div className="pt-2">
-          <Link href="/login" className="text-sm text-blue-600 hover:underline">
-            ログインへ
-          </Link>
+        <div className="pt-2 space-y-2">
+          <p className="text-sm text-gray-700">
+            アプリに戻ってログインしてください。
+          </p>
+          <a
+            href="testalbum://login"
+            className="inline-block text-sm text-blue-600 hover:underline"
+          >
+            アプリを開く
+          </a>
+          <p className="text-xs text-gray-500">
+            ボタンで開けない場合は、アプリを手動で起動してください。
+          </p>
         </div>
       </div>
     </div>
