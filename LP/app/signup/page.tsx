@@ -109,6 +109,35 @@ export default function SignupPage() {
             />
           </label>
 
+          <label className="flex items-start gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(event) => setAgreed(event.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span>
+              <a
+                href="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                プライバシーポリシー
+              </a>
+              と
+              <a
+                href="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline ml-1"
+              >
+                利用規約
+              </a>
+              に同意する
+            </span>
+          </label>
+
           <button
             type="submit"
             disabled={submitting || !agreed}
@@ -122,34 +151,7 @@ export default function SignupPage() {
           )}
         </form>
 
-        <label className="flex items-start gap-2 text-sm text-gray-700">
-          <input
-            type="checkbox"
-            checked={agreed}
-            onChange={(event) => setAgreed(event.target.checked)}
-            className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-          <span>
-            <a
-              href="/privacy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              プライバシーポリシー
-            </a>
-            と
-            <a
-              href="/terms"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline ml-1"
-            >
-              利用規約
-            </a>
-            に同意します
-          </span>
-        </label>
+
 
         <div className="pt-2 space-y-2">
           {alreadyRegistered && (
