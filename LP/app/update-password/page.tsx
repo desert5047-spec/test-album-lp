@@ -7,6 +7,8 @@ import { createSupabaseClient } from "@/lib/supabaseClient";
 export default function UpdatePasswordPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -58,26 +60,44 @@ export default function UpdatePasswordPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <label className="block text-sm font-medium text-gray-700">
             新しいパスワード
-            <input
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:outline-none"
-              placeholder="新しいパスワード"
-              autoComplete="new-password"
-            />
+            <div className="relative mt-2">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:outline-none pr-16"
+                placeholder="新しいパスワード"
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-blue-600 hover:underline"
+              >
+                {showPassword ? "非表示" : "表示"}
+              </button>
+            </div>
           </label>
 
           <label className="block text-sm font-medium text-gray-700">
             新しいパスワード（確認）
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(event) => setConfirmPassword(event.target.value)}
-              className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:outline-none"
-              placeholder="もう一度入力"
-              autoComplete="new-password"
-            />
+            <div className="relative mt-2">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:outline-none pr-16"
+                placeholder="もう一度入力"
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-blue-600 hover:underline"
+              >
+                {showConfirmPassword ? "非表示" : "表示"}
+              </button>
+            </div>
           </label>
 
           <button
