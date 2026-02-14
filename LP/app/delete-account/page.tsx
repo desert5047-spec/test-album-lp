@@ -23,9 +23,21 @@ export default function DeleteAccountPage() {
         <p className="mt-4 leading-7">
           アカウント削除をご希望の場合は、下記フォームより削除依頼を送信してください。
           <br />
-          送信後、入力された<span className="font-semibold">登録メールアドレス宛に確認メール</span>をお送りします。
           <br />
-          確認が取れ次第、アカウントおよび関連データを削除いたします。
+          送信後、入力された登録メールアドレス宛に削除確認メールをお送りします。
+          <br />
+          なりすまし防止のため、そのメールへの返信をもって削除依頼を確定いたします。
+          <br />
+          <br />
+          削除確認メールは、事業主による申請内容の確認後に順次送信しております。
+          <br />
+          通常、数日以内にご連絡いたしますが、状況によりお時間をいただく場合がございます。
+          <br />
+          <br />
+          返信が確認でき次第、アカウントおよび関連データを削除いたします。
+          <br />
+          <br />
+          ※ 確認メールが届かない場合は、迷惑メールフォルダもご確認ください。
         </p>
 
         <div className="mt-6">
@@ -39,6 +51,13 @@ export default function DeleteAccountPage() {
           </a>
         </div>
 
+        <p className="mt-4 text-sm text-gray-600">
+          ※ フォームには「アプリに登録したメールアドレス」をご入力ください。
+        </p>
+      </section>
+
+      <section className="mt-8 rounded-xl border p-6">
+        <h2 className="text-xl font-semibold">アカウント削除を依頼する（フォームを開く）</h2>
         <p className="mt-4 text-sm text-gray-600">
           ※ フォームには「アプリに登録したメールアドレス」をご入力ください。
         </p>
