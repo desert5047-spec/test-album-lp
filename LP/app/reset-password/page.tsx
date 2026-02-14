@@ -88,11 +88,17 @@ export default function ResetPasswordPage() {
       );
       setSubmitting(false);
 
-      if (resetError) {
-        console.error("[RESET_PASSWORD]", resetError);
-        setError(`送信に失敗しました: ${resetError.message}`);
-        return;
-      }
+    if (resetError) {
+      console.error("[RESET_PASSWORD]", resetError);
+      const rawMessage = resetError.message || "";
+      const normalized = rawMessage.trim();
+      const friendlyMessage =
+        normalized === "New password should be different from the old password."
+          ? "新しいパスワードは古いパスワードとは異なる必要があります。"
+          : normalized;
+      setError(`送信に失敗しました: ${friendlyMessage}`);
+      return;
+    }
     } catch (e) {
       const message = e instanceof Error ? e.message : "Unknown error";
       console.error("[RESET_PASSWORD]", e);
