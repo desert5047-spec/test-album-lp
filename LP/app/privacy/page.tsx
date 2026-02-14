@@ -47,6 +47,7 @@ export default function PrivacyPage() {
                       （1）ユーザーが入力する情報
                     </h4>
                     <ul className="list-disc list-inside space-y-1">
+                      <li>メールアドレス（アカウント登録時）</li>
                       <li>テストの写真</li>
                       <li>教科名、日付、点数などの入力情報</li>
                       <li>タグやメモなどの任意入力情報</li>
@@ -76,7 +77,6 @@ export default function PrivacyPage() {
                       （3）将来取得する可能性のある情報
                     </h4>
                     <ul className="list-disc list-inside space-y-1">
-                      <li>メールアドレス（アカウント登録時）</li>
                       <li>お問い合わせ内容</li>
                     </ul>
                   </div>
@@ -113,8 +113,8 @@ export default function PrivacyPage() {
                       （1）広告配信サービス
                     </h4>
                     <p>
-                      本サービスでは、将来的にGoogle AdMobなどの広告配信サービスを利用する可能性があります。
-                      これらのサービスは、広告識別子やCookieを使用して、ユーザーの興味・関心に基づいた広告を配信します。
+                      本サービスでは、将来的にGoogle AdMobなどの広告配信サービスを利用する場合があります。
+                      広告配信サービスを利用する場合、広告識別子やCookie等を使用して、ユーザーの興味・関心に基づいた広告を配信することがあります。
                     </p>
                   </div>
                   <Separator />
@@ -133,8 +133,8 @@ export default function PrivacyPage() {
                       （3）広告識別子について
                     </h4>
                     <p>
-                      スマートフォンアプリでは、各OSが提供する広告識別子（iOSではIDFA、AndroidではAdvertising
-                      ID）を利用します。
+                      スマートフォンアプリにおいて広告配信サービスを利用する場合、各OSが提供する広告識別子（iOSではIDFA、AndroidではAdvertising
+                      ID）を利用することがあります。
                       これらの識別子は、端末の設定から無効化または初期化できます。
                     </p>
                   </div>
@@ -187,7 +187,7 @@ export default function PrivacyPage() {
               </CardHeader>
               <CardContent className="space-y-4 text-gray-700 leading-relaxed">
                 <p>
-                  本サービスでは、取得したデータの保存および管理に、第三者のクラウドサービス（Supabase）を利用しています。
+                  本サービスでは、ユーザー認証および取得したデータの保存・管理に、第三者のクラウドサービス（Supabase）を利用しています。
                   これらのサービスは、適切なセキュリティ対策を講じた環境で運用されています。
                 </p>
                 <p>
@@ -228,7 +228,27 @@ export default function PrivacyPage() {
                       （3）アカウントの削除
                     </h4>
                     <p>
-                    ユーザーは、アカウントの削除を希望する場合、本サービス内のお問い合わせ機能よりご連絡ください。
+                      ユーザーは、アカウントの削除を希望する場合、本サービスの「アカウント削除（退会）ページ」から削除依頼を送信することができます。
+                      削除依頼の送信後、登録メールアドレス宛に削除確認メールをお送りします。
+                      なりすまし防止のため、当該メールへの返信をもって削除依頼を確定いたします。
+                      <br />
+                      <br />
+                      削除確認メールは、事業主による申請内容の確認後に順次送信するため、確認メールの送信までお時間をいただく場合があります。
+                      返信が確認でき次第、アカウントおよび関連データを削除いたします。
+                      <br />
+                      <br />
+                      削除対象には、アカウント情報、アップロードされた写真、および関連する登録データが含まれます。
+                    </p>
+                    <p className="mt-3">
+                      アカウント削除ページ：
+                      <a
+                        href="https://www.test-album.jp/delete-account"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline ml-1"
+                      >
+                        https://www.test-album.jp/delete-account
+                      </a>
                     </p>
                   </div>
                 </div>
