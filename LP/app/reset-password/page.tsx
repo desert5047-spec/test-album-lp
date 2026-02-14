@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createSupabaseClient } from "@/lib/supabaseClient";
 
 const contactUrl =
@@ -101,8 +101,17 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    setMessage("再設定リンクを送信しました。迷惑メールもご確認ください。");
+    setMessage("再設定リンクをメール送信しました。");
   };
+
+  useEffect(() => {
+    if (!message) return;
+    const timer = setTimeout(() => {
+      window.location.href = "/";
+    }, 10000);
+
+    return () => clearTimeout(timer);
+  }, [message]);
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-12">

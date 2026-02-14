@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createSupabaseClient } from "@/lib/supabaseClient";
 
@@ -51,6 +51,15 @@ export default function UpdatePasswordPage() {
     setPassword("");
     setConfirmPassword("");
   };
+
+  useEffect(() => {
+    if (!message) return;
+    const timer = setTimeout(() => {
+      window.location.href = "/";
+    }, 10000);
+
+    return () => clearTimeout(timer);
+  }, [message]);
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-12">
