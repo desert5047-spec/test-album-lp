@@ -1,4 +1,17 @@
 /** @type {import('next').NextConfig} */
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+const supabaseProjectRef = (() => {
+  try {
+    const hostname = new URL(supabaseUrl).hostname;
+    return hostname.split('.')[0] ?? '';
+  } catch {
+    return '';
+  }
+})();
+const supabaseConnectSrc = supabaseProjectRef
+  ? `https://${supabaseProjectRef}.supabase.co`
+  : 'https://*.supabase.co';
+
 const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
@@ -49,7 +62,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
               "img-src 'self' data: https: blob: https://www.google-analytics.com",
-              "connect-src 'self' https://dzqzkwoxfciuhikvnlmg.supabase.co https://*.supabase.co https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com https://*.google-analytics.com",
+              `connect-src 'self' ${supabaseConnectSrc} https://*.supabase.co https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com https://*.google-analytics.com`,
               "frame-src 'self' https://docs.google.com",
               "object-src 'none'",
               "base-uri 'self'",

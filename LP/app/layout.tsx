@@ -16,6 +16,25 @@ const notoSansJP = Noto_Sans_JP({
   display: 'swap',
 });
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+const supabaseProjectRef = (() => {
+  try {
+    const hostname = new URL(supabaseUrl).hostname;
+    return hostname.split('.')[0] ?? '';
+  } catch {
+    return '';
+  }
+})();
+const supabaseEnvLabel =
+  supabaseProjectRef === 'cwwzaknsitnaqqafbrsc'
+    ? 'prod'
+    : supabaseProjectRef === 'dzqzkwoxfciuhikvnlmg'
+      ? 'stg'
+      : 'unknown';
+const envBadgeText = `web: ${supabaseEnvLabel}${
+  supabaseProjectRef ? ` / ${supabaseProjectRef}` : ''
+}`;
+
 // サイトのベースURL（環境変数から取得）
 // 本番: https://www.test-album.jp
 // ローカル: http://localhost:3000
@@ -146,6 +165,9 @@ export default function RootLayout({
         )}
       </head>
       <body className={`${inter.variable} ${notoSansJP.variable} font-sans`}>
+        <div className="fixed right-3 top-3 z-50 rounded bg-black/70 px-2 py-1 text-[10px] font-medium text-white shadow">
+          {envBadgeText}
+        </div>
         {children}
       </body>
     </html>

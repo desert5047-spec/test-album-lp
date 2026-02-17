@@ -192,7 +192,10 @@ export default function SignupPage() {
           )}
         </form>
 
-
+        <p className="text-xs text-gray-500">
+          「このメールアドレスは既に登録されています」は、このページが接続している環境の
+          Authに既に存在するという意味です。PROD WebではPROD側、STG WebではSTG側で判定されます。
+        </p>
 
         <div className="pt-2 space-y-2">
           {alreadyRegistered && (
