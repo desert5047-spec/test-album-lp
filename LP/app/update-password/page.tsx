@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createSupabaseClient } from "@/lib/supabaseClient";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function UpdatePasswordPage() {
   const [password, setPassword] = useState("");
@@ -74,16 +75,17 @@ export default function UpdatePasswordPage() {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:outline-none pr-16"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:outline-none pr-10"
                 placeholder="新しいパスワード"
                 autoComplete="new-password"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-blue-600 hover:underline"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                aria-label={showPassword ? "パスワードを非表示" : "パスワードを表示"}
               >
-                {showPassword ? "非表示" : "表示"}
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
           </label>
@@ -95,16 +97,21 @@ export default function UpdatePasswordPage() {
                 type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:outline-none pr-16"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:outline-none pr-10"
                 placeholder="もう一度入力"
                 autoComplete="new-password"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword((prev) => !prev)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-blue-600 hover:underline"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                aria-label={
+                  showConfirmPassword
+                    ? "確認用パスワードを非表示"
+                    : "確認用パスワードを表示"
+                }
               >
-                {showConfirmPassword ? "非表示" : "表示"}
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
           </label>
