@@ -5,46 +5,27 @@ import { supabase } from '@/lib/supabaseClient';
 
 type Status = 'loading' | 'ready' | 'expired' | 'success';
 
-const parseTokensFromHash = (hash: string) => {
-  if (!hash) return { accessToken: '', refreshToken: '' };
-  const trimmed = hash.startsWith('#') ? hash.slice(1) : hash;
-  const params = new URLSearchParams(trimmed);
-  return {
-    accessToken: params.get('access_token') ?? '',
-    refreshToken: params.get('refresh_token') ?? '',
-  };
-};
-
 export default function UpdatePasswordPage() {
   const [status, setStatus] = useState<Status>('loading');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [hasSession, setHasSession] = useState(false);
 
   useEffect(() => {
-    const { accessToken, refreshToken } = parseTokensFromHash(
-      typeof window !== 'undefined' ? window.location.hash : ''
-    );
-
-    if (!accessToken || !refreshToken) {
-      setStatus('expired');
-      return;
-    }
-
-    const setSession = async () => {
-      const { error: sessionError } = await supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken,
-      });
-      if (sessionError) {
+    const checkSession = async () => {
+      const { data, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !data.session) {
         setStatus('expired');
+        setHasSession(false);
         return;
       }
+      setHasSession(true);
       setStatus('ready');
     };
 
-    void setSession();
+    void checkSession();
   }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -58,6 +39,12 @@ export default function UpdatePasswordPage() {
 
     if (password !== confirmPassword) {
       setError('パスワードが一致しません。');
+      return;
+    }
+
+    if (!hasSession) {
+      setError('リンクが期限切れです。再度リセットしてください。');
+      setStatus('expired');
       return;
     }
 
