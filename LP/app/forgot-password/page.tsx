@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabaseClient';
+
+const cooldownKey = 'forgotPasswordCooldown';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -15,29 +16,55 @@ export default function ForgotPasswordPage() {
     setMessage('');
     setError('');
 
-    if (!email.trim()) {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail) {
       setError('メールアドレスを入力してください。');
       return;
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
-    const redirectTo = siteUrl
-      ? `${siteUrl}/auth/callback`
-      : `${window.location.origin}/auth/callback`;
-
-    setSubmitting(true);
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-      email.trim(),
-      { redirectTo }
-    );
-    setSubmitting(false);
-
-    if (resetError) {
-      setError(`送信に失敗しました: ${resetError.message}`);
-      return;
+    const cooldownRaw =
+      typeof window !== 'undefined' ? window.localStorage.getItem(cooldownKey) : null;
+    if (cooldownRaw) {
+      try {
+        const parsed = JSON.parse(cooldownRaw) as { email?: string; ts?: number };
+        if (
+          parsed.email === normalizedEmail &&
+          typeof parsed.ts === 'number' &&
+          Date.now() - parsed.ts < 60_000
+        ) {
+          setError('同じメールアドレスでの送信は60秒空けてください。');
+          return;
+        }
+      } catch {
+        // ignore malformed cache
+      }
     }
 
-    setMessage('再設定リンクをメール送信しました。');
+    setSubmitting(true);
+    try {
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: normalizedEmail }),
+      });
+
+      if (!response.ok) {
+        throw new Error('request failed');
+      }
+    } catch {
+      setSubmitting(false);
+      setError('送信に失敗しました。時間をおいて再度お試しください。');
+      return;
+    }
+    setSubmitting(false);
+
+    setMessage('メールを送信しました。届かない場合は迷惑メールをご確認ください。');
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(
+        cooldownKey,
+        JSON.stringify({ email: normalizedEmail, ts: Date.now() })
+      );
+    }
   };
 
   return (

@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabaseClient';
+
+const cooldownKey = 'signupCooldown';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -16,32 +17,57 @@ export default function SignupPage() {
     setError('');
     setSuccess('');
 
-    if (!email.trim() || !password) {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail || !password) {
       setError('メールアドレスとパスワードを入力してください。');
       return;
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
-    const emailRedirectTo = siteUrl
-      ? `${siteUrl}/auth/callback`
-      : `${window.location.origin}/auth/callback`;
-
-    setSubmitting(true);
-    const { error: signUpError } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-      options: {
-        emailRedirectTo,
-      },
-    });
-    setSubmitting(false);
-
-    if (signUpError) {
-      setError(signUpError.message);
-      return;
+    const cooldownRaw =
+      typeof window !== 'undefined' ? window.localStorage.getItem(cooldownKey) : null;
+    if (cooldownRaw) {
+      try {
+        const parsed = JSON.parse(cooldownRaw) as { email?: string; ts?: number };
+        if (
+          parsed.email === normalizedEmail &&
+          typeof parsed.ts === 'number' &&
+          Date.now() - parsed.ts < 60_000
+        ) {
+          setError('同じメールアドレスでの送信は60秒空けてください。');
+          return;
+        }
+      } catch {
+        // ignore malformed cache
+      }
     }
 
-    setSuccess('確認メールを送信しました。メールをご確認ください。');
+    setSubmitting(true);
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: normalizedEmail, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error('request failed');
+      }
+    } catch {
+      setSubmitting(false);
+      setError('送信に失敗しました。時間をおいて再度お試しください。');
+      return;
+    }
+    setSubmitting(false);
+
+    setSuccess(
+      '確認メールを送信しました。届かない場合は迷惑メールをご確認ください。登録済みの場合はログイン、またはパスワードリセットをお試しください。'
+    );
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(
+        cooldownKey,
+        JSON.stringify({ email: normalizedEmail, ts: Date.now() })
+      );
+    }
   };
 
   return (
