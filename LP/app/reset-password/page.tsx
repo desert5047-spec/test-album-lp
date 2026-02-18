@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 const cooldownKey = 'forgotPasswordCooldown';
 
-export default function ForgotPasswordPage() {
+export default function ResetPasswordPage() {
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
