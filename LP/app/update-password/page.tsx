@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { Info } from 'lucide-react';
 
 type Status = 'loading' | 'ready' | 'expired' | 'success';
 
@@ -72,6 +73,10 @@ export default function UpdatePasswordPage() {
     <div className="min-h-screen bg-gray-50 px-4 py-12">
       <div className="mx-auto w-full max-w-md space-y-6 rounded-lg bg-white p-6 shadow-sm">
         <h1 className="text-2xl font-bold text-gray-900">パスワード再設定</h1>
+        <div className="flex items-start gap-2 text-sm text-gray-600">
+          <Info className="mt-0.5 h-4 w-4 text-gray-500" />
+          <p>新しいパスワードを入力してください。</p>
+        </div>
 
         {status === 'expired' && (
           <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">
