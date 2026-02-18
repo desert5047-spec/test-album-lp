@@ -2,17 +2,21 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 const cooldownKey = 'signupCooldown';
 
 export default function SignupPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [alreadyRegistered, setAlreadyRegistered] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -21,6 +25,7 @@ export default function SignupPage() {
     event.preventDefault();
     setError('');
     setSuccess('');
+    setAlreadyRegistered(false);
 
     const normalizedEmail = email.trim().toLowerCase();
     if (!normalizedEmail || !password || !confirmPassword) {
@@ -57,26 +62,61 @@ export default function SignupPage() {
     }
 
     setSubmitting(true);
-    try {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: normalizedEmail, password }),
+    const isStgHost =
+      typeof window !== 'undefined' &&
+      window.location.hostname === 'stg.test-album.jp';
+
+    if (isStgHost) {
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: normalizedEmail,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
 
-      if (!response.ok) {
-        throw new Error('request failed');
-      }
-    } catch {
-      setSubmitting(false);
-      setError('送信に失敗しました。時間をおいて再度お試しください。');
-      return;
-    }
-    setSubmitting(false);
+      const identities = data?.user?.identities;
+      const isIdentityMissing =
+        !signUpError && Array.isArray(identities) && identities.length === 0;
 
-    setSuccess(
-      '確認メールを送信しました。届かない場合は迷惑メールをご確認ください。登録済みの場合はログイン、またはパスワードリセットをお試しください。'
-    );
+      if (isIdentityMissing) {
+        setSubmitting(false);
+        setError(
+          'このメールアドレスは既に登録されています。アプリに戻ってログインしてください。'
+        );
+        setAlreadyRegistered(true);
+        return;
+      }
+
+      if (signUpError) {
+        setSubmitting(false);
+        setError(signUpError.message);
+        return;
+      }
+
+      setSubmitting(false);
+      router.push('/signup/check-email');
+    } else {
+      try {
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: normalizedEmail, password }),
+        });
+
+        if (!response.ok) {
+          throw new Error('request failed');
+        }
+      } catch {
+        setSubmitting(false);
+        setError('送信に失敗しました。時間をおいて再度お試しください。');
+        return;
+      }
+      setSubmitting(false);
+      setSuccess(
+        '確認メールを送信しました。届かない場合は迷惑メールをご確認ください。登録済みの場合はログイン、またはパスワードリセットをお試しください。'
+      );
+    }
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(
         cooldownKey,
@@ -199,6 +239,20 @@ export default function SignupPage() {
           「このメールアドレスは既に登録されています」は、その環境のAuthに既に存在するという意味です。
           PROD WebではPROD側、STG WebではSTG側で判定されます。
         </p>
+
+        {alreadyRegistered && (
+          <div className="pt-2 space-y-2">
+            <a
+              href="testalbum://login"
+              className="inline-block text-sm text-blue-600 hover:underline"
+            >
+              アプリを開く
+            </a>
+            <p className="text-xs text-gray-500">
+              ボタンで開けない場合は、アプリを手動で起動してください。
+            </p>
+          </div>
+        )}
 
         <div className="text-sm text-gray-600">
           <Link href="/privacy-policy" className="text-blue-600 hover:underline">

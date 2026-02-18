@@ -26,3 +26,7 @@ All Environments に置くのは禁止です（環境ブレの原因）。
 - お名前.com 等の DNS に、Vercel が指示するレコードを追加
   - A / CNAME のどちらか（Vercel 表示に従う）
 - 反映後、Vercel Domains で "Valid" になることを確認
+
+## STG Supabase（設定メモ）
+- Authentication > Site URL = `https://stg.test-album.jp`
+- Authentication > Redirect URLs に `https://stg.test-album.jp/auth/callback` を追加
