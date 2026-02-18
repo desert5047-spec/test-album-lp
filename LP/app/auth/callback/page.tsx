@@ -11,24 +11,49 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     const code = searchParams.get('code');
-    if (!code) {
-      setError('認証コードが見つかりません。');
+    if (code) {
+      const exchange = async () => {
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(
+          code
+        );
+        if (exchangeError) {
+          setError(`認証に失敗しました: ${exchangeError.message}`);
+          return;
+        }
+
+        router.replace('/');
+      };
+
+      void exchange();
       return;
     }
 
-    const exchange = async () => {
-      const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(
-        code
-      );
-      if (exchangeError) {
-        setError(`認証に失敗しました: ${exchangeError.message}`);
-        return;
-      }
+    const hash =
+      typeof window !== 'undefined' ? window.location.hash.replace('#', '') : '';
+    const hashParams = new URLSearchParams(hash);
+    const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
+    const type = hashParams.get('type');
 
-      router.replace('/');
-    };
+    if (accessToken && refreshToken) {
+      const setSession = async () => {
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        if (sessionError) {
+          setError(`認証に失敗しました: ${sessionError.message}`);
+          return;
+        }
 
-    void exchange();
+        router.replace(type === 'recovery' ? '/update-password' : '/auth/confirmed');
+      };
+
+      void setSession();
+      return;
+    }
+
+    setError('認証コードが見つかりません。');
   }, [router, searchParams]);
 
   return (
