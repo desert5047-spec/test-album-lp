@@ -5,6 +5,19 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 const fallbackSiteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
 
+const isProduction = process.env.NODE_ENV === 'production';
+const getRequestId = () => (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}`);
+
+const logError = (label: string, errorCode: string, error?: unknown) => {
+  const requestId = getRequestId();
+  if (isProduction) {
+    console.error(label, { requestId, errorCode });
+    return requestId;
+  }
+  console.error(label, { requestId, errorCode, error });
+  return requestId;
+};
+
 const getBaseUrl = (request: Request) => {
   const proto = request.headers.get('x-forwarded-proto') ?? 'https';
   const rawHost =
@@ -22,11 +35,11 @@ export async function POST(request: Request) {
     const password = typeof body?.password === 'string' ? body.password : '';
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      return Response.json({ ok: true });
+      return NextResponse.json({ ok: true, requestId: getRequestId() });
     }
 
     if (!email || !password) {
-      return Response.json({ ok: true });
+      return NextResponse.json({ ok: true, requestId: getRequestId() });
     }
 
     const baseUrl = getBaseUrl(request);
@@ -42,18 +55,26 @@ export async function POST(request: Request) {
     const isIdentityMissing =
       !error && Array.isArray(identities) && identities.length === 0;
     if (isIdentityMissing) {
+      const requestId = getRequestId();
       return NextResponse.json(
-        { ok: false, message: 'このメールアドレスは既に登録されています' },
+        { ok: false, errorCode: 'ALREADY_REGISTERED', requestId },
         { status: 400 }
       );
     }
     if (error) {
-      console.error('[API][SIGNUP]', error);
+      const requestId = logError('[API][SIGNUP]', 'SIGNUP_FAILED', error);
+      return NextResponse.json(
+        { ok: false, errorCode: 'SIGNUP_FAILED', requestId },
+        { status: 500 }
+      );
     }
   } catch {
-    // no-op: always return same response
-    console.error('[API][SIGNUP]', 'unexpected error');
+    const requestId = logError('[API][SIGNUP]', 'SIGNUP_FAILED');
+    return NextResponse.json(
+      { ok: false, errorCode: 'SIGNUP_FAILED', requestId },
+      { status: 500 }
+    );
   }
 
-  return Response.json({ ok: true });
+  return NextResponse.json({ ok: true, requestId: getRequestId() });
 }

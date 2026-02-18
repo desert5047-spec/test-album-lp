@@ -1,8 +1,22 @@
 import { createClient } from '@supabase/supabase-js';
+import { NextResponse } from 'next/server';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 const fallbackSiteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
+
+const isProduction = process.env.NODE_ENV === 'production';
+const getRequestId = () => (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}`);
+
+const logError = (label: string, errorCode: string, error?: unknown) => {
+  const requestId = getRequestId();
+  if (isProduction) {
+    console.error(label, { requestId, errorCode });
+    return requestId;
+  }
+  console.error(label, { requestId, errorCode, error });
+  return requestId;
+};
 
 const getBaseUrl = (request: Request) => {
   const proto = request.headers.get('x-forwarded-proto') ?? 'https';
@@ -20,11 +34,11 @@ export async function POST(request: Request) {
     const email = typeof body?.email === 'string' ? body.email.trim() : '';
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      return Response.json({ ok: true });
+      return NextResponse.json({ ok: true, requestId: getRequestId() });
     }
 
     if (!email) {
-      return Response.json({ ok: true });
+      return NextResponse.json({ ok: true, requestId: getRequestId() });
     }
 
     const baseUrl = getBaseUrl(request);
@@ -35,12 +49,19 @@ export async function POST(request: Request) {
       redirectTo,
     });
     if (error) {
-      console.error('[API][FORGOT_PASSWORD]', error);
+      const requestId = logError('[API][FORGOT_PASSWORD]', 'FORGOT_PASSWORD_FAILED', error);
+      return NextResponse.json(
+        { ok: false, errorCode: 'FORGOT_PASSWORD_FAILED', requestId },
+        { status: 500 }
+      );
     }
   } catch (e) {
-    // no-op: always return same response
-    console.error('[API][FORGOT_PASSWORD]', e);
+    const requestId = logError('[API][FORGOT_PASSWORD]', 'FORGOT_PASSWORD_FAILED', e);
+    return NextResponse.json(
+      { ok: false, errorCode: 'FORGOT_PASSWORD_FAILED', requestId },
+      { status: 500 }
+    );
   }
 
-  return Response.json({ ok: true });
+  return NextResponse.json({ ok: true, requestId: getRequestId() });
 }

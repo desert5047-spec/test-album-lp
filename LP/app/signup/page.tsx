@@ -114,7 +114,11 @@ export default function SignupPage() {
       const body = await response.json().catch(() => null);
 
       if (!response.ok) {
-        const msg = body?.message ?? '送信に失敗しました。';
+        const errorCode = body?.errorCode ?? 'SIGNUP_FAILED';
+        const msg =
+          errorCode === 'ALREADY_REGISTERED'
+            ? '既に登録済みの可能性があります。ログインをお試しください。'
+            : 'エラーが発生しました。時間をおいて再度お試しください。';
         setSubmitting(false);
         setError(msg);
         return;
