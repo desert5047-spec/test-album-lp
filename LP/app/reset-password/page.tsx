@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Info } from 'lucide-react';
 
 const cooldownKey = 'forgotPasswordCooldown';
 
@@ -71,6 +72,12 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen bg-gray-50 px-4 py-12">
       <div className="mx-auto w-full max-w-md space-y-6 rounded-lg bg-white p-6 shadow-sm">
         <h1 className="text-2xl font-bold text-gray-900">パスワード再設定</h1>
+        <div className="flex items-start gap-2 text-sm text-gray-600">
+          <Info className="mt-0.5 h-4 w-4 text-gray-500" />
+          <p>
+            パスワードが分からない場合は、登録メールアドレスを入力して再設定リンクを送ってください。
+          </p>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <label className="block text-sm font-medium text-gray-700">

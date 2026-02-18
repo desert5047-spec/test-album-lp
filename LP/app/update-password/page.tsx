@@ -55,7 +55,13 @@ export default function UpdatePasswordPage() {
     setSubmitting(false);
 
     if (updateError) {
-      setError(`更新に失敗しました: ${updateError.message}`);
+      const rawMessage = updateError.message || '';
+      const normalized = rawMessage.trim();
+      const friendlyMessage =
+        normalized === 'New password should be different from the old password.'
+          ? '新しいパスワードは現在のパスワードと同じにできません。'
+          : normalized;
+      setError(`更新に失敗しました: ${friendlyMessage}`);
       return;
     }
 

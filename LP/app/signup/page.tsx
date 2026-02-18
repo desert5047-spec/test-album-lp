@@ -111,13 +111,17 @@ export default function SignupPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: normalizedEmail, password }),
       });
+      const body = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error('request failed');
+        const msg = body?.message ?? '送信に失敗しました。';
+        setSubmitting(false);
+        setError(msg);
+        return;
       }
     } catch {
       setSubmitting(false);
-      setError('送信に失敗しました。時間をおいて再度お試しください。');
+      setError('通信に失敗しました。時間をおいて再度お試しください。');
       return;
     }
     setSubmitting(false);
