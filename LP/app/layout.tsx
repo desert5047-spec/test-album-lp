@@ -34,6 +34,7 @@ const supabaseEnvLabel =
 const envBadgeText = `web: ${supabaseEnvLabel}${
   supabaseProjectRef ? ` / ${supabaseProjectRef}` : ''
 }`;
+const showEnvBadge = process.env.NODE_ENV !== 'production';
 
 // サイトのベースURL（環境変数から取得）
 // 本番: https://www.test-album.jp
@@ -167,9 +168,11 @@ export default function RootLayout({
         )}
       </head>
       <body className={`${inter.variable} ${notoSansJP.variable} font-sans`}>
-        <div className="fixed right-3 top-3 z-50 rounded bg-black/70 px-2 py-1 text-[10px] font-medium text-white shadow">
-          {envBadgeText}
-        </div>
+        {showEnvBadge && (
+          <div className="fixed right-3 top-3 z-50 rounded bg-black/70 px-2 py-1 text-[10px] font-medium text-white shadow">
+            {envBadgeText}
+          </div>
+        )}
         {children}
       </body>
     </html>
