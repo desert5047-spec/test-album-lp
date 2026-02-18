@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export default function CheckEmailPage() {
+export default function SignupCheckEmailPage() {
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-12">
       <div className="mx-auto w-full max-w-md space-y-6 rounded-lg bg-white p-6 shadow-sm">

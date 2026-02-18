@@ -1,105 +1,71 @@
 'use client';
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { createSupabaseClient } from "@/lib/supabaseClient";
+import { useState } from 'react';
+import Link from 'next/link';
 
-const contactUrl =
-  "https://docs.google.com/forms/d/e/1FAIpQLSeNQjw8CRwEPbCD9JfvAY3dbWTdDNlyXBV8UOk4zdtGQLTOTg/viewform?usp=publish-editor";
-
-const redirectTo = "https://www.test-album.jp/update-password";
+const cooldownKey = 'forgotPasswordCooldown';
 
 export default function ResetPasswordPage() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setError("");
-    setMessage("");
+    setMessage('');
+    setError('');
 
-    if (!email.trim()) {
-      setError("メールアドレスを入力してください。");
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail) {
+      setError('メールアドレスを入力してください。');
       return;
+    }
+
+    const cooldownRaw =
+      typeof window !== 'undefined' ? window.localStorage.getItem(cooldownKey) : null;
+    if (cooldownRaw) {
+      try {
+        const parsed = JSON.parse(cooldownRaw) as { email?: string; ts?: number };
+        if (
+          parsed.email === normalizedEmail &&
+          typeof parsed.ts === 'number' &&
+          Date.now() - parsed.ts < 60_000
+        ) {
+          setError('同じメールアドレスでの送信は60秒空けてください。');
+          return;
+        }
+      } catch {
+        // ignore malformed cache
+      }
     }
 
     setSubmitting(true);
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
-    if (!supabaseUrl || !supabaseUrl.startsWith("https://")) {
-      setError(`送信に失敗しました: 無効なSUPABASE_URLです。`);
-      setSubmitting(false);
-      return;
-    }
-
     try {
-      const healthRes = await fetch(`${supabaseUrl}/auth/v1/health`, {
-        method: "GET",
-        headers: {
-          apikey: supabaseAnonKey,
-        },
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: normalizedEmail }),
       });
 
-      if (!healthRes.ok) {
-        setError("Supabaseに到達できません");
-        setSubmitting(false);
-        return;
+      if (!response.ok) {
+        throw new Error('request failed');
       }
-    } catch (e) {
-      const message = e instanceof Error ? e.message : "Unknown error";
-      setError(`Supabaseに到達できません: ${message}`);
+    } catch {
       setSubmitting(false);
+      setError('送信に失敗しました。時間をおいて再度お試しください。');
       return;
     }
+    setSubmitting(false);
 
-    const supabase = createSupabaseClient();
-    if (!supabase) {
-      const configError = new Error("Supabaseの設定が未設定です。");
-      console.error("[RESET_PASSWORD]", configError);
-      setError(`送信に失敗しました: ${configError.message}`);
-      setSubmitting(false);
-      return;
-    }
-
-    try {
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-        email.trim(),
-        { redirectTo }
+    setMessage('メールを送信しました。届かない場合は迷惑メールをご確認ください。');
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(
+        cooldownKey,
+        JSON.stringify({ email: normalizedEmail, ts: Date.now() })
       );
-      setSubmitting(false);
-
-    if (resetError) {
-      console.error("[RESET_PASSWORD]", resetError);
-      const rawMessage = resetError.message || "";
-      const normalized = rawMessage.trim();
-      const friendlyMessage =
-        normalized === "New password should be different from the old password."
-          ? "新しいパスワードは古いパスワードとは異なる必要があります。"
-          : normalized;
-      setError(`送信に失敗しました: ${friendlyMessage}`);
-      return;
     }
-    } catch (e) {
-      const message = e instanceof Error ? e.message : "Unknown error";
-      console.error("[RESET_PASSWORD]", e);
-      setError(`送信に失敗しました: ${message}`);
-      setSubmitting(false);
-      return;
-    }
-
-    setMessage("再設定リンクをメール送信しました。");
   };
-
-  useEffect(() => {
-    if (!message) return;
-    const timer = setTimeout(() => {
-      window.location.href = "/";
-    }, 10000);
-
-    return () => clearTimeout(timer);
-  }, [message]);
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-12">
@@ -116,6 +82,7 @@ export default function ResetPasswordPage() {
               className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:outline-none"
               placeholder="example@email.com"
               autoComplete="email"
+              required
             />
           </label>
 
@@ -139,28 +106,13 @@ export default function ResetPasswordPage() {
           </div>
         )}
 
-        <div className="space-y-3 text-sm text-gray-700 leading-relaxed">
-          <p>
-            メールが届かない場合は、迷惑メールフォルダをご確認のうえ、
-            少し時間を置いてから再度お試しください。
-          </p>
-          <p className="text-gray-600">
-            それでも解決しない場合は、
-            <a
-              href={contactUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline ml-1"
-            >
-              お問い合わせ
-            </a>
-            ください。
-          </p>
-        </div>
-
-        <div className="pt-2">
-          <Link href="/" className="text-sm text-blue-600 hover:underline">
-            トップへ戻る
+        <div className="text-sm text-gray-600">
+          <Link href="/privacy-policy" className="text-blue-600 hover:underline">
+            プライバシーポリシー
+          </Link>
+          <span className="mx-1">/</span>
+          <Link href="/terms" className="text-blue-600 hover:underline">
+            利用規約
           </Link>
         </div>
       </div>

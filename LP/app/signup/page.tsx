@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createSupabaseClient } from '@/lib/supabaseClient';
+import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
+
+const cooldownKey = 'signupCooldown';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -13,6 +15,7 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [alreadyRegistered, setAlreadyRegistered] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -21,9 +24,11 @@ export default function SignupPage() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
+    setSuccess('');
     setAlreadyRegistered(false);
 
-    if (!email.trim() || !password || !confirmPassword) {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail || !password || !confirmPassword) {
       setError('メールアドレスとパスワードを入力してください。');
       return;
     }
@@ -38,54 +43,94 @@ export default function SignupPage() {
       return;
     }
 
-    const supabase = createSupabaseClient();
-    if (!supabase) {
-      setError('送信に失敗しました: Supabaseの設定が未設定です。');
-      return;
+    const cooldownRaw =
+      typeof window !== 'undefined' ? window.localStorage.getItem(cooldownKey) : null;
+    if (cooldownRaw) {
+      try {
+        const parsed = JSON.parse(cooldownRaw) as { email?: string; ts?: number };
+        if (
+          parsed.email === normalizedEmail &&
+          typeof parsed.ts === 'number' &&
+          Date.now() - parsed.ts < 60_000
+        ) {
+          setError('同じメールアドレスでの送信は60秒空けてください。');
+          return;
+        }
+      } catch {
+        // ignore malformed cache
+      }
     }
 
     setSubmitting(true);
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    setSubmitting(false);
+    const isStgHost =
+      typeof window !== 'undefined' &&
+      window.location.hostname === 'stg.test-album.jp';
 
-    const identities = data?.user?.identities;
-    const isIdentityMissing =
-      !signUpError && Array.isArray(identities) && identities.length === 0;
+    if (isStgHost) {
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: normalizedEmail,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
 
-    if (isIdentityMissing) {
-      setError(
-        'このメールアドレスは既に登録されています。アプリに戻ってログインしてください。'
-      );
-      setAlreadyRegistered(true);
-      return;
-    }
+      const identities = data?.user?.identities;
+      const isIdentityMissing =
+        !signUpError && Array.isArray(identities) && identities.length === 0;
 
-    if (signUpError) {
-      const message = signUpError.message?.toLowerCase() ?? '';
-      const isAlreadyRegistered =
-        message.includes('already') ||
-        message.includes('registered') ||
-        signUpError.status === 400 ||
-        signUpError.status === 422;
-
-      if (isAlreadyRegistered) {
+      if (isIdentityMissing) {
+        setSubmitting(false);
         setError(
           'このメールアドレスは既に登録されています。アプリに戻ってログインしてください。'
         );
         setAlreadyRegistered(true);
-      } else {
-        setError(signUpError.message);
+        return;
       }
+
+      if (signUpError) {
+        setSubmitting(false);
+        setError(signUpError.message);
+        return;
+      }
+
+      setSubmitting(false);
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(
+          cooldownKey,
+          JSON.stringify({ email: normalizedEmail, ts: Date.now() })
+        );
+      }
+      router.push('/signup/check-email');
       return;
     }
 
-    router.push('/signup/check-email');
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: normalizedEmail, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error('request failed');
+      }
+    } catch {
+      setSubmitting(false);
+      setError('送信に失敗しました。時間をおいて再度お試しください。');
+      return;
+    }
+    setSubmitting(false);
+
+    setSuccess(
+      '確認メールを送信しました。届かない場合は迷惑メールをご確認ください。登録済みの場合はログイン、またはパスワードリセットをお試しください。'
+    );
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(
+        cooldownKey,
+        JSON.stringify({ email: normalizedEmail, ts: Date.now() })
+      );
+    }
   };
 
   return (
@@ -103,6 +148,7 @@ export default function SignupPage() {
               className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:outline-none"
               placeholder="example@email.com"
               autoComplete="email"
+              required
             />
           </label>
 
@@ -116,6 +162,7 @@ export default function SignupPage() {
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:outline-none pr-10"
                 placeholder="8文字以上"
                 autoComplete="new-password"
+                required
               />
               <button
                 type="button"
@@ -138,12 +185,15 @@ export default function SignupPage() {
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:outline-none pr-10"
                 placeholder="もう一度入力"
                 autoComplete="new-password"
+                required
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword((prev) => !prev)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                aria-label={showConfirmPassword ? '確認用パスワードを非表示' : '確認用パスワードを表示'}
+                aria-label={
+                  showConfirmPassword ? '確認用パスワードを非表示' : '確認用パスワードを表示'
+                }
               >
                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -159,7 +209,7 @@ export default function SignupPage() {
             />
             <span>
               <a
-                href="/privacy"
+                href="/privacy-policy"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:underline"
@@ -186,34 +236,40 @@ export default function SignupPage() {
           >
             登録する
           </button>
-
-          {error && (
-            <p className="text-sm text-red-600">{error}</p>
-          )}
         </form>
 
+        {success && (
+          <p className="text-sm text-green-700 bg-green-50 rounded p-2">{success}</p>
+        )}
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
         <p className="text-xs text-gray-500">
-          「このメールアドレスは既に登録されています」は、このページが接続している環境の
-          Authに既に存在するという意味です。PROD WebではPROD側、STG WebではSTG側で判定されます。
+          「このメールアドレスは既に登録されています」は、その環境のAuthに既に存在するという意味です。
+          PROD WebではPROD側、STG WebではSTG側で判定されます。
         </p>
 
-        <div className="pt-2 space-y-2">
-          {alreadyRegistered && (
-            <>
-              <p className="text-sm text-gray-700">
-                アプリに戻ってログインしてください。
-              </p>
-              <a
-                href="testalbum://login"
-                className="inline-block text-sm text-blue-600 hover:underline"
-              >
-                アプリを開く
-              </a>
-              <p className="text-xs text-gray-500">
-                ボタンで開けない場合は、アプリを手動で起動してください。
-              </p>
-            </>
-          )}
+        {alreadyRegistered && (
+          <div className="pt-2 space-y-2">
+            <a
+              href="testalbum://login"
+              className="inline-block text-sm text-blue-600 hover:underline"
+            >
+              アプリを開く
+            </a>
+            <p className="text-xs text-gray-500">
+              ボタンで開けない場合は、アプリを手動で起動してください。
+            </p>
+          </div>
+        )}
+
+        <div className="text-sm text-gray-600">
+          <Link href="/privacy-policy" className="text-blue-600 hover:underline">
+            プライバシーポリシー
+          </Link>
+          <span className="mx-1">/</span>
+          <Link href="/terms" className="text-blue-600 hover:underline">
+            利用規約
+          </Link>
         </div>
       </div>
     </div>

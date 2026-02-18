@@ -1,4 +1,11 @@
-const FORM_URL = "https://forms.gle/c52ykeo14HgXz8Z69";
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'アカウント削除（退会）について | テストアルバム',
+  description: 'テストアルバムのアカウント削除（退会）についてのご案内です。',
+};
+
+const deleteFormUrl = 'https://forms.gle/c52ykeo14HgXz8Z69';
 
 export default function DeleteAccountPage() {
   return (
@@ -42,10 +49,10 @@ export default function DeleteAccountPage() {
 
         <div className="mt-6">
           <a
-            href={FORM_URL}
+            href={deleteFormUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center justify-center rounded-lg border px-4 py-2 font-semibold"
+            className="inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 px-4 py-2 font-semibold text-red-700 hover:bg-red-100"
           >
             アカウント削除を依頼する（フォームを開く）
           </a>
@@ -73,7 +80,7 @@ export default function DeleteAccountPage() {
       </section>
 
       <p className="mt-8 text-sm text-gray-600">
-        プライバシーポリシー：{" "}
+        プライバシーポリシー：{' '}
         <a className="underline" href="/privacy">
           https://www.test-album.jp/privacy
         </a>
