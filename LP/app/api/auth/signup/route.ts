@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { NextResponse } from 'next/server';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
@@ -32,11 +33,20 @@ export async function POST(request: Request) {
     const emailRedirectTo = baseUrl ? `${baseUrl}/auth/callback` : undefined;
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: emailRedirectTo ? { emailRedirectTo } : undefined,
     });
+    const identities = data?.user?.identities;
+    const isIdentityMissing =
+      !error && Array.isArray(identities) && identities.length === 0;
+    if (isIdentityMissing) {
+      return NextResponse.json(
+        { ok: false, message: 'このメールアドレスは既に登録されています' },
+        { status: 400 }
+      );
+    }
     if (error) {
       console.error('[API][SIGNUP]', error);
     }
