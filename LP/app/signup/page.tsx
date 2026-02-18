@@ -251,11 +251,6 @@ export default function SignupPage() {
         )}
         {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <p className="text-xs text-gray-500">
-          「このメールアドレスは既に登録されています」は、その環境のAuthに既に存在するという意味です。
-          PROD WebではPROD側、STG WebではSTG側で判定されます。
-        </p>
-
         {alreadyRegistered && (
           <div className="pt-2 space-y-2">
             <a
