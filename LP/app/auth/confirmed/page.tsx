@@ -1,24 +1,20 @@
-import Link from 'next/link';
-
 export default function AuthConfirmedPage() {
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-12">
       <div className="mx-auto w-full max-w-md space-y-6 rounded-lg bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-900">認証が完了しました</h1>
-        <p className="text-sm text-gray-700">
-          アプリに戻ってログインしてください。
+        <h1 className="text-2xl font-bold text-gray-900">メール確認が完了しました</h1>
+        <p className="text-sm text-gray-700 leading-relaxed">
+          ご登録ありがとうございます。アプリに戻ってログインしてください。
         </p>
         <a
           href="testalbum://login"
-          className="inline-block text-sm text-blue-600 hover:underline"
+          className="block w-full rounded-md bg-blue-600 py-2.5 text-white font-semibold text-center hover:bg-blue-700"
         >
           アプリに戻る
         </a>
-        <div className="pt-2">
-          <Link href="/" className="text-sm text-blue-600 hover:underline">
-            トップへ戻る
-          </Link>
-        </div>
+        <p className="text-xs text-gray-500">
+          ボタンをタップしてアプリを開けない場合は、アプリを手動で起動してください。
+        </p>
       </div>
     </div>
   );

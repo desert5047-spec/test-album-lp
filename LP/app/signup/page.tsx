@@ -95,28 +95,36 @@ export default function SignupPage() {
       }
 
       setSubmitting(false);
-      router.push('/signup/check-email');
-    } else {
-      try {
-        const response = await fetch('/api/auth/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: normalizedEmail, password }),
-        });
-
-        if (!response.ok) {
-          throw new Error('request failed');
-        }
-      } catch {
-        setSubmitting(false);
-        setError('送信に失敗しました。時間をおいて再度お試しください。');
-        return;
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(
+          cooldownKey,
+          JSON.stringify({ email: normalizedEmail, ts: Date.now() })
+        );
       }
-      setSubmitting(false);
-      setSuccess(
-        '確認メールを送信しました。届かない場合は迷惑メールをご確認ください。登録済みの場合はログイン、またはパスワードリセットをお試しください。'
-      );
+      router.push('/signup/check-email');
+      return;
     }
+
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: normalizedEmail, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error('request failed');
+      }
+    } catch {
+      setSubmitting(false);
+      setError('送信に失敗しました。時間をおいて再度お試しください。');
+      return;
+    }
+    setSubmitting(false);
+
+    setSuccess(
+      '確認メールを送信しました。届かない場合は迷惑メールをご確認ください。登録済みの場合はログイン、またはパスワードリセットをお試しください。'
+    );
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(
         cooldownKey,
