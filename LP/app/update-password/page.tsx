@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { Info } from 'lucide-react';
+import { Eye, EyeOff, Info } from 'lucide-react';
 
 type Status = 'loading' | 'ready' | 'expired' | 'success';
 
@@ -10,6 +10,8 @@ export default function UpdatePasswordPage() {
   const [status, setStatus] = useState<Status>('loading');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [hasSession, setHasSession] = useState(false);
@@ -102,28 +104,50 @@ export default function UpdatePasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <label className="block text-sm font-medium text-gray-700">
               新しいパスワード
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:outline-none"
-                placeholder="8文字以上"
-                autoComplete="new-password"
-                required
-              />
+              <div className="relative mt-2">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:outline-none pr-10"
+                  placeholder="8文字以上"
+                  autoComplete="new-password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  aria-label={showPassword ? 'パスワードを非表示' : 'パスワードを表示'}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </label>
 
             <label className="block text-sm font-medium text-gray-700">
               新しいパスワード（確認）
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
-                className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:outline-none"
-                placeholder="もう一度入力"
-                autoComplete="new-password"
-                required
-              />
+              <div className="relative mt-2">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-base focus:border-blue-500 focus:outline-none pr-10"
+                  placeholder="もう一度入力"
+                  autoComplete="new-password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  aria-label={
+                    showConfirmPassword ? '確認用パスワードを非表示' : '確認用パスワードを表示'
+                  }
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </label>
 
             <button
