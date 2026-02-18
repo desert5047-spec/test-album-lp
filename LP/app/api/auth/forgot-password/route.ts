@@ -31,11 +31,15 @@ export async function POST(request: Request) {
     const redirectTo = baseUrl ? `${baseUrl}/auth/callback` : undefined;
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo,
     });
-  } catch {
+    if (error) {
+      console.error('[API][FORGOT_PASSWORD]', error);
+    }
+  } catch (e) {
     // no-op: always return same response
+    console.error('[API][FORGOT_PASSWORD]', e);
   }
 
   return Response.json({ ok: true });

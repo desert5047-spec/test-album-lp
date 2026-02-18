@@ -32,13 +32,17 @@ export async function POST(request: Request) {
     const emailRedirectTo = baseUrl ? `${baseUrl}/auth/callback` : undefined;
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: emailRedirectTo ? { emailRedirectTo } : undefined,
     });
+    if (error) {
+      console.error('[API][SIGNUP]', error);
+    }
   } catch {
     // no-op: always return same response
+    console.error('[API][SIGNUP]', 'unexpected error');
   }
 
   return Response.json({ ok: true });
