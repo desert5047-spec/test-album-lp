@@ -17,6 +17,7 @@ All Environments に置くのは禁止です（環境ブレの原因）。
 ## Web URL 運用ルール
 - 本番: `https://www.test-album.jp`（PROD Supabase 固定）
 - STG: `https://stg.test-album.jp`（STG Supabase 固定）
+- 本番デプロイ後は `/health` で supabaseRef を確認
 
 ## /signup の重複判定について
 「このメールアドレスは既に登録されています」は、その環境の Auth に

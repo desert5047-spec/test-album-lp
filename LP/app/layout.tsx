@@ -31,10 +31,8 @@ const supabaseEnvLabel =
     : supabaseProjectRef === 'dzqzkwoxfciuhikvnlmg'
       ? 'stg'
       : 'unknown';
-const envBadgeText = `web: ${supabaseEnvLabel}${
-  supabaseProjectRef ? ` / ${supabaseProjectRef}` : ''
-}`;
-const showEnvBadge = process.env.NODE_ENV !== 'production';
+const envBadgeText = `web: stg / ref: ${supabaseProjectRef || 'unknown'}`;
+const showEnvBadge = supabaseEnvLabel === 'stg';
 
 // サイトのベースURL（環境変数から取得）
 // 本番: https://www.test-album.jp

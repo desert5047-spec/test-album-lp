@@ -50,12 +50,10 @@ export default function ResetPasswordPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: normalizedEmail }),
       });
-      const body = await response.json().catch(() => null);
-
       if (!response.ok) {
         const msg = 'エラーが発生しました。時間をおいて再度お試しください。';
         setSubmitting(false);
-        setError(body?.message ?? msg);
+        setError(msg);
         return;
       }
     } catch {
