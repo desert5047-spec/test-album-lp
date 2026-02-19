@@ -15,7 +15,6 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [alreadyRegistered, setAlreadyRegistered] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -24,7 +23,6 @@ export default function SignupPage() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
-    setSuccess('');
     setAlreadyRegistered(false);
 
     const normalizedEmail = email.trim().toLowerCase();
@@ -66,46 +64,43 @@ export default function SignupPage() {
       typeof window !== 'undefined' &&
       window.location.hostname === 'stg.test-album.jp';
 
-    if (isStgHost) {
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email: normalizedEmail,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-
-      const identities = data?.user?.identities;
-      const isIdentityMissing =
-        !signUpError && Array.isArray(identities) && identities.length === 0;
-
-      if (isIdentityMissing) {
-        setSubmitting(false);
-        setError(
-          'このメールアドレスは既に登録されています。アプリに戻ってログインしてください。'
-        );
-        setAlreadyRegistered(true);
-        return;
-      }
-
-      if (signUpError) {
-        setSubmitting(false);
-        setError(signUpError.message);
-        return;
-      }
-
-      setSubmitting(false);
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(
-          cooldownKey,
-          JSON.stringify({ email: normalizedEmail, ts: Date.now() })
-        );
-      }
-      router.push('/signup/check-email');
-      return;
-    }
-
     try {
+      if (isStgHost) {
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email: normalizedEmail,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
+        });
+
+        const identities = data?.user?.identities;
+        const isIdentityMissing =
+          !signUpError && Array.isArray(identities) && identities.length === 0;
+
+        if (isIdentityMissing) {
+          setError(
+            'このメールアドレスは既に登録されています。アプリに戻ってログインしてください。'
+          );
+          setAlreadyRegistered(true);
+          return;
+        }
+
+        if (signUpError) {
+          setError('エラーが発生しました。時間をおいて再度お試しください。');
+          return;
+        }
+
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(
+            cooldownKey,
+            JSON.stringify({ email: normalizedEmail, ts: Date.now() })
+          );
+        }
+        router.push('/signup/sent');
+        return;
+      }
+
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -119,25 +114,21 @@ export default function SignupPage() {
           errorCode === 'ALREADY_REGISTERED'
             ? '既に登録済みの可能性があります。ログインをお試しください。'
             : 'エラーが発生しました。時間をおいて再度お試しください。';
-        setSubmitting(false);
         setError(msg);
         return;
       }
-    } catch {
-      setSubmitting(false);
-      setError('通信に失敗しました。時間をおいて再度お試しください。');
-      return;
-    }
-    setSubmitting(false);
 
-    setSuccess(
-      '確認メールを送信しました。届かない場合は迷惑メールをご確認ください。登録済みの場合はログイン、またはパスワードリセットをお試しください。'
-    );
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(
-        cooldownKey,
-        JSON.stringify({ email: normalizedEmail, ts: Date.now() })
-      );
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(
+          cooldownKey,
+          JSON.stringify({ email: normalizedEmail, ts: Date.now() })
+        );
+      }
+      router.push('/signup/sent');
+    } catch {
+      setError('通信に失敗しました。時間をおいて再度お試しください。');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -239,16 +230,15 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            disabled={submitting || !agreed}
+            disabled={
+              submitting || !agreed || !email.trim() || !password || !confirmPassword
+            }
             className="w-full rounded-md bg-blue-600 py-2.5 text-white font-semibold hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            登録する
+            {submitting ? '送信中…' : '登録する'}
           </button>
         </form>
 
-        {success && (
-          <p className="text-sm text-green-700 bg-green-50 rounded p-2">{success}</p>
-        )}
         {error && <p className="text-sm text-red-600">{error}</p>}
 
         {alreadyRegistered && (

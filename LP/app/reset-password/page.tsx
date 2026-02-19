@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Info } from 'lucide-react';
 
 const cooldownKey = 'forgotPasswordCooldown';
 
 export default function ResetPasswordPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
@@ -70,6 +72,7 @@ export default function ResetPasswordPage() {
         JSON.stringify({ email: normalizedEmail, ts: Date.now() })
       );
     }
+    router.push('/reset-password/sent');
   };
 
   return (
