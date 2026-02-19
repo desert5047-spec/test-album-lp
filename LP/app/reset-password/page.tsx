@@ -72,7 +72,7 @@ export default function ResetPasswordPage() {
         JSON.stringify({ email: normalizedEmail, ts: Date.now() })
       );
     }
-    router.push('/reset-password/sent');
+    router.push(`/reset-password/sent?email=${encodeURIComponent(email)}`);
   };
 
   return (

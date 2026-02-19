@@ -97,7 +97,7 @@ export default function SignupPage() {
             JSON.stringify({ email: normalizedEmail, ts: Date.now() })
           );
         }
-        router.push('/signup/sent');
+        router.push(`/signup/sent?email=${encodeURIComponent(email)}`);
         return;
       }
 
@@ -124,7 +124,7 @@ export default function SignupPage() {
           JSON.stringify({ email: normalizedEmail, ts: Date.now() })
         );
       }
-      router.push('/signup/sent');
+      router.push(`/signup/sent?email=${encodeURIComponent(email)}`);
     } catch {
       setError('通信に失敗しました。時間をおいて再度お試しください。');
     } finally {
