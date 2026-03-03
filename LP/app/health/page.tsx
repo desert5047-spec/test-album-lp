@@ -8,8 +8,9 @@ const supabaseRef = (() => {
   }
 })();
 
+import { BUILD_TIME } from '@/lib/build-info';
+
 const env = process.env.NODE_ENV ?? 'unknown';
-const buildTime = process.env.NEXT_PUBLIC_BUILD_TIME;
 
 export default function HealthPage() {
   return (
@@ -18,7 +19,7 @@ export default function HealthPage() {
       <p>status: ok</p>
       <p>env: {env}</p>
       <p>supabaseRef: {supabaseRef}</p>
-      {buildTime && <p>buildTime: {buildTime}</p>}
+      <p>buildTime: {BUILD_TIME}</p>
     </main>
   );
 }

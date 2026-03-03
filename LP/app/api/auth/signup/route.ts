@@ -1,22 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { log } from '@/lib/logger';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 const fallbackSiteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
 
-const isProduction = process.env.NODE_ENV === 'production';
 const getRequestId = () => (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}`);
-
-const logError = (label: string, errorCode: string, error?: unknown) => {
-  const requestId = getRequestId();
-  if (isProduction) {
-    console.error(label, { requestId, errorCode });
-    return requestId;
-  }
-  console.error(label, { requestId, errorCode, error });
-  return requestId;
-};
 
 const getBaseUrl = (request: Request) => {
   const proto = request.headers.get('x-forwarded-proto') ?? 'https';
@@ -62,14 +52,24 @@ export async function POST(request: Request) {
       );
     }
     if (error) {
-      const requestId = logError('[API][SIGNUP]', 'SIGNUP_FAILED', error);
+      const requestId = getRequestId();
+      log('error', '[API][SIGNUP] failed', {
+        requestId,
+        errorCode: 'SIGNUP_FAILED',
+        error,
+      });
       return NextResponse.json(
         { ok: false, errorCode: 'SIGNUP_FAILED', requestId },
         { status: 500 }
       );
     }
-  } catch {
-    const requestId = logError('[API][SIGNUP]', 'SIGNUP_FAILED');
+  } catch (error) {
+    const requestId = getRequestId();
+    log('error', '[API][SIGNUP] failed', {
+      requestId,
+      errorCode: 'SIGNUP_FAILED',
+      error,
+    });
     return NextResponse.json(
       { ok: false, errorCode: 'SIGNUP_FAILED', requestId },
       { status: 500 }

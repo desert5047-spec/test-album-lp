@@ -1,22 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { log } from '@/lib/logger';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 const fallbackSiteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
 
-const isProduction = process.env.NODE_ENV === 'production';
 const getRequestId = () => (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}`);
-
-const logError = (label: string, errorCode: string, error?: unknown) => {
-  const requestId = getRequestId();
-  if (isProduction) {
-    console.error(label, { requestId, errorCode });
-    return requestId;
-  }
-  console.error(label, { requestId, errorCode, error });
-  return requestId;
-};
 
 const getBaseUrl = (request: Request) => {
   const proto = request.headers.get('x-forwarded-proto') ?? 'https';
@@ -49,14 +39,24 @@ export async function POST(request: Request) {
       redirectTo,
     });
     if (error) {
-      const requestId = logError('[API][FORGOT_PASSWORD]', 'FORGOT_PASSWORD_FAILED', error);
+      const requestId = getRequestId();
+      log('error', '[API][FORGOT_PASSWORD] failed', {
+        requestId,
+        errorCode: 'FORGOT_PASSWORD_FAILED',
+        error,
+      });
       return NextResponse.json(
         { ok: false, errorCode: 'FORGOT_PASSWORD_FAILED', requestId },
         { status: 500 }
       );
     }
   } catch (e) {
-    const requestId = logError('[API][FORGOT_PASSWORD]', 'FORGOT_PASSWORD_FAILED', e);
+    const requestId = getRequestId();
+    log('error', '[API][FORGOT_PASSWORD] failed', {
+      requestId,
+      errorCode: 'FORGOT_PASSWORD_FAILED',
+      error: e,
+    });
     return NextResponse.json(
       { ok: false, errorCode: 'FORGOT_PASSWORD_FAILED', requestId },
       { status: 500 }

@@ -1,0 +1,2 @@
+// AUTO-GENERATED. DO NOT EDIT.
+export const BUILD_TIME = "1970-01-01T00:00:00.000Z" as const;
