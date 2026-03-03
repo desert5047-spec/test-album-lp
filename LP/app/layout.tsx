@@ -1,18 +1,13 @@
 import './globals.css';
+import '@fontsource/noto-sans-jp/400.css';
+import '@fontsource/noto-sans-jp/700.css';
 import type { Metadata } from 'next';
-import { Inter, Noto_Sans_JP } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import Script from 'next/script';
 
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
-  display: 'swap',
-});
-
-const notoSansJP = Noto_Sans_JP({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-noto-sans-jp',
   display: 'swap',
 });
 
@@ -165,7 +160,7 @@ export default function RootLayout({
           </>
         )}
       </head>
-      <body className={`${inter.variable} ${notoSansJP.variable} font-sans`}>
+      <body className={`${inter.variable} font-sans`}>
         {showEnvBadge && (
           <div className="fixed right-3 top-3 z-50 rounded bg-black/70 px-2 py-1 text-[10px] font-medium text-white shadow">
             {envBadgeText}
