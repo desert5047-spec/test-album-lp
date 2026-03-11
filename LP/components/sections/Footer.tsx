@@ -25,7 +25,7 @@ export function Footer() {
                   alt="テストアルバム"
                   width={40}
                   height={40}
-                  className="object-contain bg-transparent"
+                  className="object-contain bg-transparent w-full h-auto"
                 />
               </div>
               <span className="text-xl font-semibold text-white group-hover:text-blue-400 transition-colors">

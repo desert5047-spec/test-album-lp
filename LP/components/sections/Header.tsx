@@ -27,7 +27,7 @@ export function Header() {
                 alt="テストアルバム"
                 width={40}
                 height={40}
-                className="object-contain"
+                className="object-contain w-full h-auto"
                 priority
               />
             </div>

@@ -135,7 +135,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ja">
+    <html lang="ja" suppressHydrationWarning>
       <head>
         {/* 変更理由: Google Analytics 4導入のため、Google tag (gtag.js)を<head>に明示的に配置 */}
         {/* 本番環境かつGA IDが設定されている場合のみ読み込む */}

@@ -54,11 +54,12 @@ const nextConfig = {
           // Content Security Policy
           // セキュリティ: CSPを設定してXSSを防止
           // Google Analyticsと外部画像を許可
+          // development時のみ 'unsafe-eval' を許可（Next.js dev server の HMR 等で必要）
           {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com",
+              "script-src 'self' 'unsafe-inline'" + (process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : '') + " https://www.googletagmanager.com https://www.google-analytics.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
               "img-src 'self' data: https: blob: https://www.google-analytics.com",

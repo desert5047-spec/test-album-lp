@@ -9,7 +9,7 @@ export function HeroAfterCard() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.2 }}
-      className="relative w-full"
+      className="relative w-full max-w-[600px] mx-auto lg:mx-0"
     >
       <div className="w-full rounded-2xl overflow-hidden shadow-xl">
         <Image

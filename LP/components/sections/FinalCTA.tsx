@@ -26,7 +26,7 @@ export function FinalCTA() {
           <div className="flex flex-col items-center gap-2 pt-4">
             <div className="flex items-center justify-center gap-4 flex-wrap">
               <a
-                href="#"
+                href="https://t.co/aMNVUEHeCK"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="transition-opacity hover:opacity-80 h-10 flex items-center"
@@ -53,7 +53,7 @@ export function FinalCTA() {
               </a>
             </div>
             <p className="text-xs sm:text-sm text-gray-500">
-              アプリは近日公開予定
+              iOSはリリース済み、Androidアプリは近日公開予定
             </p>
           </div>
         </div>

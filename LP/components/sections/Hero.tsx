@@ -10,7 +10,7 @@ export function Hero() {
   return (
     <section className="relative py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-blue-50/50 via-white to-white overflow-hidden">
       <Container>
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -61,7 +61,7 @@ export function Hero() {
             <div className="flex flex-col items-center lg:items-start gap-2 pt-4 px-4 lg:px-0">
               <div className="flex items-center justify-center lg:justify-start gap-4 flex-wrap">
                 <a
-                  href="#"
+                  href="https://t.co/aMNVUEHeCK"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="transition-opacity hover:opacity-80 h-10 flex items-center"
@@ -88,12 +88,12 @@ export function Hero() {
                 </a>
               </div>
               <p className="text-xs sm:text-sm text-gray-500">
-                アプリは近日公開予定
+                iOSはリリース済み、Androidアプリは近日公開予定
               </p>
             </div>
           </motion.div>
 
-          <div className="order-2 lg:order-2">
+          <div className="order-2 min-w-0 w-full">
             <HeroVisual />
           </div>
         </div>
