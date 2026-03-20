@@ -39,7 +39,7 @@ export function FinalCTA() {
                 />
               </a>
               <a
-                href="#"
+                href="https://play.google.com/store/apps/details?id=jp.testalbum.app&hl=ja"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="transition-opacity hover:opacity-80 h-10 flex items-center"
@@ -52,9 +52,6 @@ export function FinalCTA() {
                 />
               </a>
             </div>
-            <p className="text-xs sm:text-sm text-gray-500">
-              iOSはリリース済み、Androidアプリは近日公開予定
-            </p>
           </div>
         </div>
       </Container>

@@ -129,7 +129,7 @@ export default function InvitePage() {
     unauthorized: {
       title: 'ログインが必要です',
       body: '招待の参加にはログインが必要です。',
-      primaryLabel: 'Googleでログインして続行',
+      primaryLabel: 'ログインして続行',
     },
     email_mismatch: {
       title: 'ログイン中のアカウントが一致しません',
