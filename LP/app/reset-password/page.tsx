@@ -15,8 +15,8 @@ export default function ResetPasswordPage() {
     () => sanitizeReturnTo(searchParams.get('returnTo')),
     [searchParams]
   );
-  const signupHref = safeReturn
-    ? `/signup?returnTo=${encodeURIComponent(safeReturn)}`
+  const backHref = safeReturn
+    ? `/invite-auth?returnTo=${encodeURIComponent(safeReturn)}`
     : '/signup';
 
   const [email, setEmail] = useState('');
@@ -131,7 +131,7 @@ export default function ResetPasswordPage() {
         )}
 
         <p className="text-sm text-gray-600">
-          <Link href={signupHref} className="text-blue-600 hover:underline">
+          <Link href={backHref} className="text-blue-600 hover:underline">
             ログイン・新規登録に戻る
           </Link>
         </p>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -24,8 +24,6 @@ type StatusCode =
 type MessageConfig = {
   title: string;
   body: string;
-  primaryLabel?: string;
-  secondaryLabel?: string;
 };
 
 export default function InvitePage() {
@@ -38,76 +36,72 @@ export default function InvitePage() {
   const [loading, setLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  const joinedRef = useRef(false);
+
   const appDeeplink = process.env.NEXT_PUBLIC_APP_DEEPLINK ?? '';
   const appStoreUrl = process.env.NEXT_PUBLIC_APP_STORE_URL ?? '';
   const playStoreUrl = process.env.NEXT_PUBLIC_PLAY_STORE_URL ?? '';
 
-  const signupHref = useMemo(() => {
-    if (!token) return '/signup';
-    const returnPath = `/invite?token=${encodeURIComponent(token)}`;
-    return `/signup?returnTo=${encodeURIComponent(returnPath)}`;
+  const inviteAuthHref = useMemo(() => {
+    const returnPath = token
+      ? `/invite?token=${encodeURIComponent(token)}`
+      : '';
+    const qs = new URLSearchParams();
+    if (returnPath) qs.set('returnTo', returnPath);
+    if (preview?.invited_email) qs.set('email', preview.invited_email);
+    const qsStr = qs.toString();
+    return `/invite-auth${qsStr ? `?${qsStr}` : ''}`;
+  }, [token, preview?.invited_email]);
+
+  const loadPreview = useCallback(async () => {
+    if (!token) {
+      setStatus('invalid_token');
+      return;
+    }
+
+    if (joinedRef.current) return;
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    setIsLoggedIn(!!session);
+
+    const { data, error } = await supabase.rpc('get_invite_preview', { token });
+
+    if (joinedRef.current) return;
+
+    if (error) {
+      console.error('[invite] get_invite_preview error', error.message);
+      setStatus('unknown');
+      return;
+    }
+
+    const row = Array.isArray(data) ? data[0] : data;
+    setPreview(row ?? null);
+    setStatus((row?.status as StatusCode) ?? 'unknown');
   }, [token]);
 
   useEffect(() => {
-    let cancelled = false;
-
-    const load = async () => {
-      if (!token) {
-        if (!cancelled) setStatus('invalid_token');
-        return;
-      }
-
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!cancelled) setIsLoggedIn(!!session);
-
-      console.log('[invite] get_invite_preview called', {
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-        tokenLength: token.length,
-        hasSession: !!session,
-      });
-
-      const { data, error } = await supabase.rpc('get_invite_preview', { token });
-      if (cancelled) return;
-      if (error) {
-        console.error('[invite] get_invite_preview RPC error', {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-          hint: error.hint,
-          status: (error as any).status,
-        });
-        setStatus('unknown');
-        return;
-      }
-
-      console.log('[invite] get_invite_preview RPC success', { data });
-
-      const row = Array.isArray(data) ? data[0] : data;
-      setPreview(row ?? null);
-      setStatus((row?.status as StatusCode) ?? 'unknown');
-    };
-
-    void load();
+    void loadPreview();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(() => {
-      void load();
+      if (!joinedRef.current) {
+        void loadPreview();
+      }
     });
 
     return () => {
-      cancelled = true;
       subscription.unsubscribe();
     };
-  }, [token]);
+  }, [loadPreview]);
 
   const handleSwitchAccount = async () => {
     setLoading(true);
     try {
       await supabase.auth.signOut();
-      router.push(signupHref);
+      router.push(inviteAuthHref);
     } finally {
       setLoading(false);
     }
@@ -124,38 +118,24 @@ export default function InvitePage() {
         return;
       }
 
-      console.log('[invite] accept_invite called', {
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-        tokenLength: token.length,
-        tokenPrefix: token.slice(0, 8),
-        hasAccessToken: !!s.session.access_token,
-      });
-
       const { data, error } = await supabase.rpc('accept_invite', { invite_token: token });
 
       if (error) {
-        console.error('[invite] accept_invite RPC error', {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-          hint: error.hint,
-          status: (error as any).status,
-        });
+        console.error('[invite] accept_invite error', error.message);
         throw error;
       }
 
-      console.log('[invite] accept_invite RPC success', { data });
-
       const row = Array.isArray(data) ? data[0] : data;
-      if (!row?.ok) {
+
+      if (row != null && typeof row === 'object' && 'ok' in row && !row.ok) {
         const code = (row?.code as StatusCode) ?? 'unknown';
         setStatus(code);
         return;
       }
 
+      joinedRef.current = true;
       setStatus('joined');
-    } catch (err: any) {
-      console.error('[invite] accept_invite exception', err);
+    } catch {
       setStatus('unknown');
     } finally {
       setLoading(false);
@@ -163,28 +143,31 @@ export default function InvitePage() {
   };
 
   const invitedEmail = preview?.invited_email ?? '';
+
   const COPY: Record<StatusCode, MessageConfig> = {
     loading: {
       title: '確認中...',
       body: '招待情報を確認しています。',
     },
     valid: {
-      title: '家族に参加できます',
-      body: `この招待は ${invitedEmail || '指定のメールアドレス'} 宛てです。メールアドレスでログインまたは新規登録のうえ、参加を確定してください。`,
+      title: isLoggedIn
+        ? '家族に参加できます'
+        : '家族に招待されています',
+      body: isLoggedIn
+        ? '下のボタンを押すと参加が完了します。'
+        : `参加するには、招待されたメールアドレス${invitedEmail ? `（${invitedEmail}）` : ''}でログインまたは新規登録してください。`,
     },
     unauthorized: {
-      title: 'ログインが必要です',
-      body: '招待の参加には、メールアドレスとパスワードでのログイン（または新規登録）が必要です。',
+      title: '家族に招待されています',
+      body: `参加するには、招待されたメールアドレス${invitedEmail ? `（${invitedEmail}）` : ''}でログインまたは新規登録してください。`,
     },
     email_mismatch: {
       title: 'ログイン中のアカウントが一致しません',
-      body: `この招待は ${invitedEmail || '別のメールアドレス'} 宛てです。招待先のメールアドレスでログインするか、別アカウントでお試しください。`,
-      primaryLabel: '別アカウントでログインまたは新規登録',
+      body: `この招待は ${invitedEmail || '別のメールアドレス'} 宛てです。招待先のメールアドレスでログインしてください。`,
     },
     already_in_other_family: {
       title: '既に別の家族に参加しています',
-      body: 'このアカウントは既に別の家族に参加しているため、この招待には参加できません。別アカウントでログインまたは新規登録してください。',
-      primaryLabel: '別アカウントでログインまたは新規登録',
+      body: 'このアカウントは既に別の家族に参加しているため、この招待には参加できません。別アカウントでお試しください。',
     },
     expired: {
       title: '招待リンクの期限が切れています',
@@ -203,10 +186,8 @@ export default function InvitePage() {
       body: '時間をおいて再度お試しください。',
     },
     joined: {
-      title: '参加が完了しました',
+      title: '家族への参加が完了しました',
       body: 'アプリを開くと家族共有が反映されます。',
-      primaryLabel: 'アプリを開く',
-      secondaryLabel: 'ストアへ',
     },
   };
 
@@ -232,24 +213,24 @@ export default function InvitePage() {
       {showAuthCta && (
         <button
           type="button"
-          onClick={() => router.push(signupHref)}
+          onClick={() => router.push(inviteAuthHref)}
           disabled={loading}
           style={{ marginTop: 16 }}
         >
-          メールアドレスでログインまたは新規登録して参加
+          ログインまたは新規登録して参加する
         </button>
       )}
 
       {showSwitchAccount && (
         <button type="button" onClick={handleSwitchAccount} disabled={loading} style={{ marginTop: 16 }}>
-          {loading ? '処理中...' : message.primaryLabel ?? '別アカウントで続行'}
+          {loading ? '処理中...' : '別アカウントでログインまたは新規登録'}
         </button>
       )}
 
       {status === 'joined' && (
         <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
           {appDeeplink && (
-            <a href={appDeeplink}>{message.primaryLabel ?? 'アプリを開く'}</a>
+            <a href={appDeeplink}>アプリを開く</a>
           )}
           {(appStoreUrl || playStoreUrl) && (
             <>
