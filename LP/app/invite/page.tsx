@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import { CheckCircle2, AlertTriangle, Users } from 'lucide-react';
 
 type Preview = {
   status: string;
@@ -24,6 +25,7 @@ type StatusCode =
 type MessageConfig = {
   title: string;
   body: string;
+  icon?: 'success' | 'warning' | 'invite';
 };
 
 export default function InvitePage() {
@@ -156,38 +158,47 @@ export default function InvitePage() {
       body: isLoggedIn
         ? '下のボタンを押すと参加が完了します。'
         : `参加するには、招待されたメールアドレス${invitedEmail ? `（${invitedEmail}）` : ''}でログインまたは新規登録してください。`,
+      icon: 'invite',
     },
     unauthorized: {
       title: '家族に招待されています',
       body: `参加するには、招待されたメールアドレス${invitedEmail ? `（${invitedEmail}）` : ''}でログインまたは新規登録してください。`,
+      icon: 'invite',
     },
     email_mismatch: {
       title: 'ログイン中のアカウントが一致しません',
       body: `この招待は ${invitedEmail || '別のメールアドレス'} 宛てです。招待先のメールアドレスでログインしてください。`,
+      icon: 'warning',
     },
     already_in_other_family: {
       title: '既に別の家族に参加しています',
       body: 'このアカウントは既に別の家族に参加しているため、この招待には参加できません。別アカウントでお試しください。',
+      icon: 'warning',
     },
     expired: {
       title: '招待リンクの期限が切れています',
       body: 'お手数ですが、招待した人に再発行を依頼してください。',
+      icon: 'warning',
     },
     used: {
       title: 'この招待リンクは使用済みです',
       body: '既に参加が完了している可能性があります。アプリでログインして家族が見えるか確認してください。',
+      icon: 'warning',
     },
     invalid_token: {
       title: '招待リンクが無効です',
       body: 'URLが正しいか確認してください。',
+      icon: 'warning',
     },
     unknown: {
       title: '参加処理に失敗しました',
       body: '時間をおいて再度お試しください。',
+      icon: 'warning',
     },
     joined: {
       title: '家族への参加が完了しました',
       body: 'アプリを開くと家族共有が反映されます。',
+      icon: 'success',
     },
   };
 
@@ -198,67 +209,114 @@ export default function InvitePage() {
   const showSwitchAccount =
     status === 'email_mismatch' || status === 'already_in_other_family';
 
+  const iconEl =
+    message.icon === 'success' ? (
+      <CheckCircle2 className="mx-auto h-12 w-12 text-green-500" />
+    ) : message.icon === 'warning' ? (
+      <AlertTriangle className="mx-auto h-12 w-12 text-amber-500" />
+    ) : message.icon === 'invite' ? (
+      <Users className="mx-auto h-12 w-12 text-blue-500" />
+    ) : null;
+
   return (
-    <main style={{ maxWidth: 720, margin: '0 auto', padding: 16 }}>
-      <h1>家族招待</h1>
-      <h2 style={{ marginTop: 12 }}>{message.title}</h2>
-      <p style={{ marginTop: 8, whiteSpace: 'pre-line' }}>{message.body}</p>
+    <div className="min-h-screen bg-gray-50 px-4 py-12">
+      <div className="mx-auto w-full max-w-md space-y-6 rounded-lg bg-white p-6 shadow-sm">
+        {status === 'loading' ? (
+          <div className="py-8 text-center">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
+            <p className="mt-4 text-sm text-gray-500">{message.body}</p>
+          </div>
+        ) : (
+          <>
+            {iconEl && <div className="pt-2">{iconEl}</div>}
 
-      {showJoinButton && (
-        <button type="button" onClick={onJoin} disabled={loading} style={{ marginTop: 16 }}>
-          {loading ? '処理中...' : '参加を確定する'}
-        </button>
-      )}
+            <h1 className="text-2xl font-bold text-gray-900 text-center">
+              {message.title}
+            </h1>
+            <p className="text-sm text-gray-600 text-center leading-relaxed">
+              {message.body}
+            </p>
 
-      {showAuthCta && (
-        <button
-          type="button"
-          onClick={() => router.push(inviteAuthHref)}
-          disabled={loading}
-          style={{ marginTop: 16 }}
-        >
-          ログインまたは新規登録して参加する
-        </button>
-      )}
+            {showJoinButton && (
+              <button
+                type="button"
+                onClick={onJoin}
+                disabled={loading}
+                className="w-full rounded-md bg-blue-600 py-2.5 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading ? '処理中...' : '参加を確定する'}
+              </button>
+            )}
 
-      {showSwitchAccount && (
-        <button type="button" onClick={handleSwitchAccount} disabled={loading} style={{ marginTop: 16 }}>
-          {loading ? '処理中...' : '別アカウントでログインまたは新規登録'}
-        </button>
-      )}
+            {showAuthCta && (
+              <button
+                type="button"
+                onClick={() => router.push(inviteAuthHref)}
+                disabled={loading}
+                className="w-full rounded-md bg-blue-600 py-2.5 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                ログイン / 新規登録して続ける
+              </button>
+            )}
 
-      {status === 'joined' && (
-        <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
-          {appDeeplink && (
-            <a href={appDeeplink}>アプリを開く</a>
-          )}
-          {(appStoreUrl || playStoreUrl) && (
-            <>
-              {appStoreUrl && (
-                <a href={appStoreUrl} target="_blank" rel="noreferrer">
-                  アプリをインストール（App Store）
-                </a>
-              )}
-              {playStoreUrl && (
-                <a href={playStoreUrl} target="_blank" rel="noreferrer">
-                  アプリをインストール（Google Play）
-                </a>
-              )}
-            </>
-          )}
-          <button
-            type="button"
-            onClick={() => {
-              window.close();
-              if (!document.hidden) {
-                router.replace('/');
-              }
-            }}
-          >
-            閉じる
-          </button>
-        </div>
-      )}
-    </main>
+            {showSwitchAccount && (
+              <button
+                type="button"
+                onClick={handleSwitchAccount}
+                disabled={loading}
+                className="w-full rounded-md border-2 border-blue-600 py-2.5 font-semibold text-blue-600 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading ? '処理中...' : '別アカウントでログイン / 新規登録'}
+              </button>
+            )}
+
+            {status === 'joined' && (
+              <div className="space-y-3 pt-2">
+                {appDeeplink && (
+                  <a
+                    href={appDeeplink}
+                    className="block w-full rounded-md bg-blue-600 py-2.5 text-center font-semibold text-white hover:bg-blue-700"
+                  >
+                    アプリを開く
+                  </a>
+                )}
+                {appStoreUrl && (
+                  <a
+                    href={appStoreUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block w-full rounded-md border border-gray-300 py-2.5 text-center text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    アプリをインストール（App Store）
+                  </a>
+                )}
+                {playStoreUrl && (
+                  <a
+                    href={playStoreUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block w-full rounded-md border border-gray-300 py-2.5 text-center text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    アプリをインストール（Google Play）
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.close();
+                    if (!document.hidden) {
+                      router.replace('/');
+                    }
+                  }}
+                  className="w-full rounded-md border border-gray-300 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  閉じる
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
   );
 }
