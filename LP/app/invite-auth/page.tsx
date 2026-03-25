@@ -19,8 +19,9 @@ export default function InviteAuthPage() {
     [searchParams]
   );
   const invitedEmail = searchParams.get('email') ?? '';
+  const initialMode = searchParams.get('mode') === 'login' ? 'login' : 'signup';
 
-  const [mode, setMode] = useState<AuthMode>('login');
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [email, setEmail] = useState(invitedEmail);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');

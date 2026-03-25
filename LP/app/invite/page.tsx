@@ -44,16 +44,21 @@ export default function InvitePage() {
   const appStoreUrl = process.env.NEXT_PUBLIC_APP_STORE_URL ?? '';
   const playStoreUrl = process.env.NEXT_PUBLIC_PLAY_STORE_URL ?? '';
 
-  const inviteAuthHref = useMemo(() => {
-    const returnPath = token
-      ? `/invite?token=${encodeURIComponent(token)}`
-      : '';
-    const qs = new URLSearchParams();
-    if (returnPath) qs.set('returnTo', returnPath);
-    if (preview?.invited_email) qs.set('email', preview.invited_email);
-    const qsStr = qs.toString();
-    return `/invite-auth${qsStr ? `?${qsStr}` : ''}`;
-  }, [token, preview?.invited_email]);
+  const buildAuthHref = useCallback(
+    (mode: 'signup' | 'login') => {
+      const returnPath = token
+        ? `/invite?token=${encodeURIComponent(token)}`
+        : '';
+      const qs = new URLSearchParams();
+      if (returnPath) qs.set('returnTo', returnPath);
+      if (preview?.invited_email) qs.set('email', preview.invited_email);
+      qs.set('mode', mode);
+      return `/invite-auth?${qs.toString()}`;
+    },
+    [token, preview?.invited_email],
+  );
+
+  const inviteAuthHref = useMemo(() => buildAuthHref('signup'), [buildAuthHref]);
 
   const loadPreview = useCallback(async () => {
     if (!token) {
@@ -249,14 +254,24 @@ export default function InvitePage() {
             )}
 
             {showAuthCta && (
-              <button
-                type="button"
-                onClick={() => router.push(inviteAuthHref)}
-                disabled={loading}
-                className="w-full rounded-md bg-blue-600 py-2.5 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                ログイン / 新規登録して続ける
-              </button>
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => router.push(buildAuthHref('signup'))}
+                  disabled={loading}
+                  className="w-full rounded-md bg-blue-600 py-2.5 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  新規登録して参加する
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push(buildAuthHref('login'))}
+                  disabled={loading}
+                  className="w-full rounded-md border-2 border-blue-600 py-2.5 font-semibold text-blue-600 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  ログインして参加する
+                </button>
+              </div>
             )}
 
             {showSwitchAccount && (
