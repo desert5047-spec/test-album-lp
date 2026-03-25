@@ -131,7 +131,7 @@ export default function InvitePage() {
         hasAccessToken: !!s.session.access_token,
       });
 
-      const { data, error } = await supabase.rpc('accept_invite', { token });
+      const { data, error } = await supabase.rpc('accept_invite', { invite_token: token });
 
       if (error) {
         console.error('[invite] accept_invite RPC error', {
