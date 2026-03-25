@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { supabaseBrowser } from '@/lib/supabaseBrowser';
+import { supabase } from '@/lib/supabaseClient';
 
 type Preview = {
   status: string;
@@ -29,7 +29,6 @@ type MessageConfig = {
 };
 
 export default function InvitePage() {
-  const supabase = useMemo(() => supabaseBrowser(), []);
   const router = useRouter();
   const params = useSearchParams();
 
@@ -39,25 +38,32 @@ export default function InvitePage() {
   const [loading, setLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    (typeof window !== 'undefined' ? window.location.origin : '');
   const appDeeplink = process.env.NEXT_PUBLIC_APP_DEEPLINK ?? '';
   const appStoreUrl = process.env.NEXT_PUBLIC_APP_STORE_URL ?? '';
   const playStoreUrl = process.env.NEXT_PUBLIC_PLAY_STORE_URL ?? '';
-  const returnTo = token ? `${siteUrl}/invite?token=${encodeURIComponent(token)}` : siteUrl;
+
+  const signupHref = useMemo(() => {
+    if (!token) return '/signup';
+    const returnPath = `/invite?token=${encodeURIComponent(token)}`;
+    return `/signup?returnTo=${encodeURIComponent(returnPath)}`;
+  }, [token]);
 
   useEffect(() => {
-    const run = async () => {
+    let cancelled = false;
+
+    const load = async () => {
       if (!token) {
-        setStatus('invalid_token');
+        if (!cancelled) setStatus('invalid_token');
         return;
       }
 
-      const { data: s } = await supabase.auth.getSession();
-      setIsLoggedIn(!!s.session);
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!cancelled) setIsLoggedIn(!!session);
 
       const { data, error } = await supabase.rpc('get_invite_preview', { token });
+      if (cancelled) return;
       if (error) {
         setStatus('unknown');
         return;
@@ -68,22 +74,28 @@ export default function InvitePage() {
       setStatus((row?.status as StatusCode) ?? 'unknown');
     };
 
-    run();
-  }, [supabase, token]);
+    void load();
 
-  const onLogin = async () => {
-    if (!token) return;
-    setLoading(true);
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: returnTo },
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      void load();
     });
-  };
 
-  const onSwitchAccount = async () => {
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  }, [token]);
+
+  const handleSwitchAccount = async () => {
     setLoading(true);
-    await supabase.auth.signOut();
-    await onLogin();
+    try {
+      await supabase.auth.signOut();
+      router.push(signupHref);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onJoin = async () => {
@@ -108,7 +120,7 @@ export default function InvitePage() {
       }
 
       setStatus('joined');
-    } catch (e: any) {
+    } catch {
       setStatus('unknown');
     } finally {
       setLoading(false);
@@ -123,23 +135,21 @@ export default function InvitePage() {
     },
     valid: {
       title: '家族に参加できます',
-      body: `この招待は ${invitedEmail || '指定のメールアドレス'} 宛てです。ログイン後に参加が確定します。`,
-      primaryLabel: isLoggedIn ? '参加を確定する' : 'ログインして参加する',
+      body: `この招待は ${invitedEmail || '指定のメールアドレス'} 宛てです。メールアドレスでログインまたは新規登録のうえ、参加を確定してください。`,
     },
     unauthorized: {
       title: 'ログインが必要です',
-      body: '招待の参加にはログインが必要です。',
-      primaryLabel: 'ログインして続行',
+      body: '招待の参加には、メールアドレスとパスワードでのログイン（または新規登録）が必要です。',
     },
     email_mismatch: {
       title: 'ログイン中のアカウントが一致しません',
-      body: `この招待は ${invitedEmail || '別のメールアドレス'} 宛てです。別のアカウントでログインしてください。`,
-      primaryLabel: '別アカウントで続行',
+      body: `この招待は ${invitedEmail || '別のメールアドレス'} 宛てです。招待先のメールアドレスでログインするか、別アカウントでお試しください。`,
+      primaryLabel: '別アカウントでログインまたは新規登録',
     },
     already_in_other_family: {
       title: '既に別の家族に参加しています',
-      body: 'このアカウントは既に別の家族に参加しているため、この招待には参加できません。',
-      primaryLabel: '別アカウントでログイン',
+      body: 'このアカウントは既に別の家族に参加しているため、この招待には参加できません。別アカウントでログインまたは新規登録してください。',
+      primaryLabel: '別アカウントでログインまたは新規登録',
     },
     expired: {
       title: '招待リンクの期限が切れています',
@@ -166,9 +176,10 @@ export default function InvitePage() {
   };
 
   const message = COPY[status] ?? COPY.unknown;
-  const canJoin = status === 'valid';
-  const canLogin = status === 'unauthorized';
-  const canSwitchAccount =
+  const showJoinButton = status === 'valid' && isLoggedIn;
+  const showAuthCta =
+    (status === 'valid' && !isLoggedIn) || status === 'unauthorized';
+  const showSwitchAccount =
     status === 'email_mismatch' || status === 'already_in_other_family';
 
   return (
@@ -177,20 +188,25 @@ export default function InvitePage() {
       <h2 style={{ marginTop: 12 }}>{message.title}</h2>
       <p style={{ marginTop: 8, whiteSpace: 'pre-line' }}>{message.body}</p>
 
-      {canJoin && (
-        <button onClick={onJoin} disabled={loading}>
-          {loading ? '処理中...' : message.primaryLabel ?? '参加する'}
+      {showJoinButton && (
+        <button type="button" onClick={onJoin} disabled={loading} style={{ marginTop: 16 }}>
+          {loading ? '処理中...' : '参加を確定する'}
         </button>
       )}
 
-      {canLogin && (
-        <button onClick={onLogin} disabled={loading}>
-          {loading ? '処理中...' : message.primaryLabel ?? 'ログインして続行'}
+      {showAuthCta && (
+        <button
+          type="button"
+          onClick={() => router.push(signupHref)}
+          disabled={loading}
+          style={{ marginTop: 16 }}
+        >
+          メールアドレスでログインまたは新規登録して参加
         </button>
       )}
 
-      {canSwitchAccount && (
-        <button onClick={onSwitchAccount} disabled={loading}>
+      {showSwitchAccount && (
+        <button type="button" onClick={handleSwitchAccount} disabled={loading} style={{ marginTop: 16 }}>
           {loading ? '処理中...' : message.primaryLabel ?? '別アカウントで続行'}
         </button>
       )}
@@ -215,6 +231,7 @@ export default function InvitePage() {
             </>
           )}
           <button
+            type="button"
             onClick={() => {
               window.close();
               if (!document.hidden) {

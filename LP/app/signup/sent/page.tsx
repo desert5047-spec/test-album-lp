@@ -1,10 +1,17 @@
 'use client';
 
+import Link from 'next/link';
+import { useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { sanitizeReturnTo } from '@/lib/sanitizeReturnTo';
 
 export default function SignupSentPage() {
   const sp = useSearchParams();
   const email = sp.get('email') ?? '';
+  const safeReturn = useMemo(
+    () => sanitizeReturnTo(sp.get('returnTo')),
+    [sp]
+  );
 
   return (
     <main className="mx-auto w-full max-w-md px-6 py-12">
@@ -33,6 +40,16 @@ export default function SignupSentPage() {
         <br />
         また、入力したメールアドレスをご確認のうえ、もう一度お試しください。
       </p>
+
+      {safeReturn && (
+        <p className="mt-6 text-sm text-muted-foreground">
+          メール内のリンクを押すと、元のページ（家族招待など）に戻ります。
+          <br />
+          <Link href={safeReturn} className="mt-2 inline-block text-blue-600 hover:underline">
+            すでに確認済みの場合はこちら
+          </Link>
+        </p>
+      )}
     </main>
   );
 }

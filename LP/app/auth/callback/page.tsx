@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import { sanitizeReturnTo } from '@/lib/sanitizeReturnTo';
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -10,6 +11,8 @@ export default function AuthCallbackPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    const safeNext = sanitizeReturnTo(searchParams.get('next'));
+
     const code = searchParams.get('code');
     if (code) {
       const exchange = async () => {
@@ -21,7 +24,7 @@ export default function AuthCallbackPage() {
           return;
         }
 
-        router.replace('/');
+        router.replace(safeNext ?? '/');
       };
 
       void exchange();
@@ -46,7 +49,11 @@ export default function AuthCallbackPage() {
           return;
         }
 
-        router.replace(type === 'recovery' ? '/update-password' : '/auth/confirmed');
+        if (type === 'recovery') {
+          router.replace('/update-password');
+          return;
+        }
+        router.replace(safeNext ?? '/auth/confirmed');
       };
 
       void setSession();

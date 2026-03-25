@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { log } from '@/lib/logger';
+import { sanitizeReturnTo } from '@/lib/sanitizeReturnTo';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
@@ -23,6 +24,9 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => null);
     const email = typeof body?.email === 'string' ? body.email.trim() : '';
     const password = typeof body?.password === 'string' ? body.password : '';
+    const returnToRaw =
+      typeof body?.returnTo === 'string' ? body.returnTo : undefined;
+    const safeReturn = sanitizeReturnTo(returnToRaw ?? null);
 
     if (!supabaseUrl || !supabaseAnonKey) {
       return NextResponse.json({ ok: true, requestId: getRequestId() });
@@ -33,7 +37,9 @@ export async function POST(request: Request) {
     }
 
     const baseUrl = getBaseUrl(request);
-    const emailRedirectTo = baseUrl ? `${baseUrl}/auth/callback` : undefined;
+    const emailRedirectTo = baseUrl
+      ? `${baseUrl}/auth/callback${safeReturn ? `?next=${encodeURIComponent(safeReturn)}` : ''}`
+      : undefined;
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
     const { data, error } = await supabase.auth.signUp({

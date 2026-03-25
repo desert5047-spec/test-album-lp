@@ -1,14 +1,24 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Info } from 'lucide-react';
+import { sanitizeReturnTo } from '@/lib/sanitizeReturnTo';
 
 const cooldownKey = 'forgotPasswordCooldown';
 
 export default function ResetPasswordPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const safeReturn = useMemo(
+    () => sanitizeReturnTo(searchParams.get('returnTo')),
+    [searchParams]
+  );
+  const signupHref = safeReturn
+    ? `/signup?returnTo=${encodeURIComponent(safeReturn)}`
+    : '/signup';
+
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
@@ -70,7 +80,9 @@ export default function ResetPasswordPage() {
         JSON.stringify({ email: normalizedEmail, ts: Date.now() })
       );
     }
-    router.push(`/reset-password/sent?email=${encodeURIComponent(email)}`);
+    const sentQs = new URLSearchParams({ email });
+    if (safeReturn) sentQs.set('returnTo', safeReturn);
+    router.push(`/reset-password/sent?${sentQs.toString()}`);
   };
 
   return (
@@ -117,6 +129,12 @@ export default function ResetPasswordPage() {
             {error}
           </div>
         )}
+
+        <p className="text-sm text-gray-600">
+          <Link href={signupHref} className="text-blue-600 hover:underline">
+            ログイン・新規登録に戻る
+          </Link>
+        </p>
 
         <div className="text-sm text-gray-600">
           <Link href="/privacy-policy" className="text-blue-600 hover:underline">
