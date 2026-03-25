@@ -62,12 +62,27 @@ export default function InvitePage() {
       } = await supabase.auth.getSession();
       if (!cancelled) setIsLoggedIn(!!session);
 
+      console.log('[invite] get_invite_preview called', {
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+        tokenLength: token.length,
+        hasSession: !!session,
+      });
+
       const { data, error } = await supabase.rpc('get_invite_preview', { token });
       if (cancelled) return;
       if (error) {
+        console.error('[invite] get_invite_preview RPC error', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          status: (error as any).status,
+        });
         setStatus('unknown');
         return;
       }
+
+      console.log('[invite] get_invite_preview RPC success', { data });
 
       const row = Array.isArray(data) ? data[0] : data;
       setPreview(row ?? null);
@@ -109,8 +124,27 @@ export default function InvitePage() {
         return;
       }
 
+      console.log('[invite] accept_invite called', {
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+        tokenLength: token.length,
+        tokenPrefix: token.slice(0, 8),
+        hasAccessToken: !!s.session.access_token,
+      });
+
       const { data, error } = await supabase.rpc('accept_invite', { token });
-      if (error) throw error;
+
+      if (error) {
+        console.error('[invite] accept_invite RPC error', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          status: (error as any).status,
+        });
+        throw error;
+      }
+
+      console.log('[invite] accept_invite RPC success', { data });
 
       const row = Array.isArray(data) ? data[0] : data;
       if (!row?.ok) {
@@ -120,7 +154,8 @@ export default function InvitePage() {
       }
 
       setStatus('joined');
-    } catch {
+    } catch (err: any) {
+      console.error('[invite] accept_invite exception', err);
       setStatus('unknown');
     } finally {
       setLoading(false);
