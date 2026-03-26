@@ -31,7 +31,7 @@ export default function TermsPage() {
               この利用規約（以下「本規約」）は、テストアルバム（以下「本サービス」）の利用条件を定めるものです。
               本サービスをご利用になる前に、必ずお読みください。
             </p>
-            <p className="text-sm text-gray-500">最終更新日：2026年2月</p>
+            <p className="text-sm text-gray-500">最終更新日：2026年3月</p>
           </div>
 
           <div className="space-y-6">
@@ -60,6 +60,7 @@ export default function TermsPage() {
                   <li>教科、日付、点数などの情報を記録する機能（任意）</li>
                   <li>月ごとの振り返りや推移を確認する機能</li>
                   <li>タグによる整理機能</li>
+                  <li>家族メンバーを招待し、家族グループ内で情報を共有できる機能</li>
                 </ul>
                 <p>本サービスでは、広告が表示される場合があります。また、将来的に一部機能を有料で提供する場合があります。
                 </p>
@@ -86,7 +87,9 @@ export default function TermsPage() {
                 </ul>
                 <p>ユーザーは、自己の責任においてアカウント情報を管理するものとし、第三者による不正利用について、運営者は責任を負いません。
                 </p>
-
+                <p>
+                  ユーザーは、家族共有機能を利用する場合、当該機能により情報が他の家族メンバーに共有されることを理解し、同意した上で利用するものとします。
+                </p>
               </CardContent>
             </Card>
 
@@ -107,6 +110,8 @@ export default function TermsPage() {
                   <li>
                     不正アクセスその他の方法により、本サービスまたは他のユーザーに損害を与える行為
                   </li>
+                  <li>招待された家族グループ外の第三者に、本サービス上の情報を無断で共有または公開する行為</li>
+                  <li>他人の子どもに関する情報を、正当な権限なく登録・共有する行為</li>
                   <li>その他、運営者が不適切と判断する行為</li>
                 </ul>
               </CardContent>
@@ -188,7 +193,30 @@ export default function TermsPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>第8条（個人情報の取り扱い）</CardTitle>
+                <CardTitle>第8条（家族共有機能）</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-gray-700 leading-relaxed">
+                <p>
+                  本サービスでは、ユーザーが家族メンバーを招待し、同一の家族グループ内で情報を共有できる機能を提供します。
+                </p>
+                <p>
+                  家族グループに参加したユーザーは、当該グループ内の情報を閲覧できる場合があります。
+                </p>
+                <p>
+                  ユーザーは、招待リンクの管理および家族グループへの参加・共有について自己の責任において行うものとします。
+                </p>
+                <p>
+                  運営者は、家族間における情報共有に関して生じたトラブルについて、一切の責任を負いません。
+                </p>
+                <p>
+                  また、ユーザーが家族グループから脱退した場合、当該グループの情報へのアクセスはできなくなります。
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>第9条（個人情報の取り扱い）</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-gray-700 leading-relaxed">
                 <p>
@@ -206,7 +234,7 @@ export default function TermsPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>第9条（規約の変更）</CardTitle>
+                <CardTitle>第10条（規約の変更）</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-gray-700 leading-relaxed">
                 <p>
@@ -221,7 +249,7 @@ export default function TermsPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>第10条（準拠法・管轄裁判所）</CardTitle>
+                <CardTitle>第11条（準拠法・管轄裁判所）</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-gray-700 leading-relaxed">
                 <p>本規約の解釈および適用は、日本法に準拠します。</p>
