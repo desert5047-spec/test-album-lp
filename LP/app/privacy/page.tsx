@@ -31,7 +31,7 @@ export default function PrivacyPage() {
               テストアルバム（以下「本サービス」）は、ユーザーの個人情報を大切に扱います。
               このプライバシーポリシーでは、本サービスがどのような情報を取得し、どのように利用するかを説明します。
             </p>
-            <p className="text-sm text-gray-500">最終更新日：2026年2月</p>
+            <p className="text-sm text-gray-500">最終更新日：2026年3月</p>
           </div>
 
           <div className="space-y-6">
@@ -52,6 +52,9 @@ export default function PrivacyPage() {
                       <li>教科名、日付、点数などの入力情報</li>
                       <li>タグやメモなどの任意入力情報</li>
                     </ul>
+                    <p className="mt-2 text-sm">
+                      家族招待機能の利用時に、招待リンクの発行情報、招待作成日時、招待元ユーザー情報等を取得する場合があります。
+                    </p>
                   </div>
                   <Separator />
                   <div>
@@ -96,6 +99,7 @@ export default function PrivacyPage() {
                   <li>サービスの改善・新機能の開発</li>
                   <li>利用状況の分析</li>
                   <li>不正利用の防止</li>
+                  <li>家族共有機能の提供および家族グループの管理</li>
                   <li>広告の配信および効果測定</li>
                   <li>お知らせやキャンペーン情報の配信</li>
                 </ul>
@@ -113,7 +117,7 @@ export default function PrivacyPage() {
                       （1）広告配信サービス
                     </h4>
                     <p>
-                      本サービスでは、将来的にGoogle AdMobなどの広告配信サービスを利用する場合があります。
+                      本サービスでは、将来的にGoogle AdMobなどの広告配信サービスを利用する場合があります。（※現時点では広告配信は行っていません。導入時は本ポリシーを更新します。）
                       広告配信サービスを利用する場合、広告識別子やCookie等を使用して、ユーザーの興味・関心に基づいた広告を配信することがあります。
                     </p>
                   </div>
@@ -178,6 +182,9 @@ export default function PrivacyPage() {
                   <li>Google AdMob（広告配信）</li>
                   <li>Google Analytics（利用状況の分析）</li>
                 </ul>
+                <p>
+                  また、本サービスにおける家族共有機能は、ユーザーの操作に基づき、サービス内の機能として情報が共有されるものであり、第三者提供には該当しません。
+                </p>
                </CardContent>
             </Card>
 
@@ -189,6 +196,7 @@ export default function PrivacyPage() {
                 <p>
                   本サービスでは、ユーザー認証および取得したデータの保存・管理に、第三者のクラウドサービス（Supabase）を利用しています。
                   これらのサービスは、適切なセキュリティ対策を講じた環境で運用されています。
+                  また、家族共有機能におけるデータの管理についても、同様のセキュリティ対策のもとで取り扱われます。
                 </p>
                 <p>
                   運営者は、ユーザーの個人情報について、不正アクセス、紛失、破壊、改ざん、漏洩などの防止に努め、合理的な安全対策を講じます。
@@ -257,7 +265,37 @@ export default function PrivacyPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>7. お子さまの個人情報について</CardTitle>
+                <CardTitle>7. 家族共有機能について</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-gray-700 leading-relaxed">
+                <p>
+                  本サービスでは、ユーザーが家族メンバーを招待し、同一の家族グループ内で情報を共有できる機能を提供しています。
+                </p>
+                <p>
+                  家族グループに参加したユーザーは、当該グループ内に登録された以下の情報を閲覧できる場合があります。
+                </p>
+                <ul className="list-disc list-inside space-y-1 ml-4">
+                  <li>子どもに関する情報</li>
+                  <li>テストの写真</li>
+                  <li>教科、日付、点数などの記録情報</li>
+                  <li>メモやタグなどの入力情報</li>
+                </ul>
+                <p>
+                  これらの情報は、本サービスの機能として、家族グループ内のユーザー間で共有されます。
+                  ユーザーは、家族グループに参加することにより、本ポリシーに記載された範囲で情報が共有されることに同意したものとみなされます。
+                </p>
+                <p>
+                  ユーザーは、招待リンクの管理および共有範囲について責任を持つものとします。
+                </p>
+                <p>
+                  また、家族グループからの脱退、またはアカウント削除を行った場合、その後は当該グループの情報にアクセスできなくなります。
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>8. お子さまの個人情報について</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-gray-700 leading-relaxed">
                 <p>
@@ -272,7 +310,7 @@ export default function PrivacyPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>8. プライバシーポリシーの変更</CardTitle>
+                <CardTitle>9. プライバシーポリシーの変更</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-gray-700 leading-relaxed">
                 <p>
@@ -287,7 +325,7 @@ export default function PrivacyPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>9. お問い合わせ</CardTitle>
+                <CardTitle>10. お問い合わせ</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-gray-700 leading-relaxed">
                 <p>
