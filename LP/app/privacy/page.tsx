@@ -50,6 +50,7 @@ export default function PrivacyPage() {
                       <li>メールアドレス（アカウント登録時）</li>
                       <li>テストの写真</li>
                       <li>教科名、日付、点数などの入力情報</li>
+                      <li>お子さまの学年、生年月日または誕生月</li>
                       <li>タグやメモなどの任意入力情報</li>
                     </ul>
                     <p className="mt-2 text-sm">
@@ -99,6 +100,7 @@ export default function PrivacyPage() {
                   <li>サービスの改善・新機能の開発</li>
                   <li>利用状況の分析</li>
                   <li>不正利用の防止</li>
+                  <li>成績の推移や傾向をグラフ等で可視化するため</li>
                   <li>家族共有機能の提供および家族グループの管理</li>
                   <li>広告の配信および効果測定</li>
                   <li>お知らせやキャンペーン情報の配信</li>
